@@ -29,7 +29,7 @@ _PVE_PLAYER_FIELDS = {
     'final_pdmg_bonus':     ('Final P.DMG Bonus %',     0),
     'elemental_counter':    ('Elemental Counter %',      100),
     'element_enhance':      ('Element Enhance %',        0),
-    'bonus_dmg_element':    ('Bonus DMG to Element',     0.0),
+    'bonus_dmg_element':    ('Bonus DMG to Element %',   0),
     'bonus_dmg_race':       ('Bonus DMG to Race %',      0),
     'final_dmg_bonus':      ('Final DMG Bonus %',        0),
     'weapon_size_modifier': ('Weapon Size Modifier %',   100),
@@ -76,7 +76,7 @@ _ALL_FIELDS = {
 # Fields whose UI values are integer percentages (e.g. 20 → 0.20 in the formula).
 _PCT_FIELDS = {
     'crit_dmg_bonus', 'final_pdmg_bonus', 'weapon_size_modifier', 'size_enhance',
-    'bonus_dmg_race', 'elemental_counter', 'element_enhance',
+    'bonus_dmg_race', 'elemental_counter', 'element_enhance', 'bonus_dmg_element',
     'final_dmg_bonus', 'pvp_final_pdmg_bonus',
     # Target reductions
     'crit_dmg_reduc', 'final_pdmg_reduc', 'element_resist', 'size_reduc',
@@ -103,23 +103,36 @@ _GROUP_ICONS = {
 
 # Grouped layout: list of (header, [player_fields], [target_fields])
 _PVE_GROUPS = [
-    ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc']),
-    ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc']),
-    ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc']),
-    ('Size',        ['weapon_size_modifier', 'size_enhance'],                       []),
-    ('Element',     ['elemental_counter', 'element_enhance', 'bonus_dmg_element'],  []),
-    ('Race',        ['bonus_dmg_race'],                                             []),
-    ('Final DMG',   ['final_dmg_bonus'],                                            ['final_dmg_reduc']),
+    ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc'],  None),
+    ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc'],
+        lambda p, t: p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100),
+    ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc'],
+        lambda p, t: max(1 + (p['final_pdmg_bonus'] - t['final_pdmg_reduc']) / 100, 0.2)),
+    ('Size',        ['weapon_size_modifier', 'size_enhance'],                       [],
+        lambda p, t: max((p['weapon_size_modifier'] + p['size_enhance']) / 100, 0.2)),
+    ('Element',     ['elemental_counter', 'element_enhance', 'bonus_dmg_element'],  [],
+        lambda p, t: max((p['elemental_counter'] + p['element_enhance']) / 100, 0.2) * (1 + p['bonus_dmg_element'] / 100)),
+    ('Race',        ['bonus_dmg_race'],                                             [],
+        lambda p, t: max(1 + p['bonus_dmg_race'] / 100, 0.2)),
+    ('Final DMG',   ['final_dmg_bonus'],                                            ['final_dmg_reduc'],
+        lambda p, t: max(1 + (p['final_dmg_bonus'] - t['final_dmg_reduc']) / 100, 0.2)),
 ]
 _PVP_GROUPS = [
-    ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc']),
-    ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc']),
-    ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc']),
-    ('Size',        ['weapon_size_modifier', 'size_enhance'],                       ['size_reduc']),
-    ('Element',     ['elemental_counter', 'element_enhance'],                       ['element_resist']),
-    ('Race',        ['bonus_dmg_race'],                                             ['race_reduc']),
-    ('Final DMG',   ['final_dmg_bonus'],                                            ['final_dmg_reduc']),
-    ('PVP DMG',     ['pvp_pdmg_bonus', 'pvp_final_pdmg_bonus'],                    ['pvp_pdmg_reduc', 'pvp_final_pdmg_reduc']),
+    ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc'],  None),
+    ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc'],
+        lambda p, t: p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100),
+    ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc'],
+        lambda p, t: max(1 + (p['final_pdmg_bonus'] - t['final_pdmg_reduc']) / 100, 0.2)),
+    ('Size',        ['weapon_size_modifier', 'size_enhance'],                       ['size_reduc'],
+        lambda p, t: max((p['weapon_size_modifier'] + p['size_enhance'] - t['size_reduc']) / 100, 0.2)),
+    ('Element',     ['elemental_counter', 'element_enhance'],                       ['element_resist'],
+        lambda p, t: max((p['elemental_counter'] + p['element_enhance'] - t['element_resist']) / 100, 0.2)),
+    ('Race',        ['bonus_dmg_race'],                                             ['race_reduc'],
+        lambda p, t: max(1 + (p['bonus_dmg_race'] - t['race_reduc']) / 100, 0.2)),
+    ('Final DMG',   ['final_dmg_bonus'],                                            ['final_dmg_reduc'],
+        lambda p, t: max(1 + (p['final_dmg_bonus'] - t['final_dmg_reduc']) / 100, 0.2)),
+    ('PVP DMG',     ['pvp_pdmg_bonus', 'pvp_final_pdmg_bonus'],                    ['pvp_pdmg_reduc', 'pvp_final_pdmg_reduc'],
+        lambda p, t: max(1 + (p['pvp_final_pdmg_bonus'] - t['pvp_final_pdmg_reduc']) / 100, 0.2)),
 ]
 
 
@@ -130,17 +143,18 @@ def _field_key(prefix: str, field: str) -> str:
     return f"{prefix}_{field}"
 
 
-def _render_input(field: str, label: str, default, key: str):
+def _render_input(field: str, label: str, default, key: str, on_change=None):
+    kwargs = {"on_change": on_change} if on_change else {}
     if field in _SELECT_FIELDS:
         options = _SELECT_FIELDS[field]
         return st.selectbox(
             label, options=options, index=options.index(int(default)),
-            format_func=lambda x: f"{x}%", key=key,
+            format_func=lambda x: f"{x}%", key=key, **kwargs,
         )
     elif field in _PCT_FIELDS:
-        return st.number_input(label, value=int(default), min_value=0, step=1, key=key)
+        return st.number_input(label, value=int(default), min_value=0, step=1, key=key, **kwargs)
     else:
-        return st.number_input(label, value=default, min_value=0.0, key=key)
+        return st.number_input(label, value=default, min_value=0.0, key=key, **kwargs)
 
 
 def _read_from_session(fields: dict, key_prefix: str) -> dict:
@@ -283,7 +297,7 @@ def _render_combined(weights: dict[str, float], labels: dict[str, str], referenc
         bar_width = int(norm_score * 100)
         name_style = "font-weight:700;" if is_ref else ""
         ref_star = " ★" if is_ref else ""
-        equiv_str = "1.00×" if is_ref else f"{equiv:.2f}×"
+        equiv_str = "1.00" if is_ref else f"{equiv:.2f}"
 
         rows_html += f"""
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
@@ -312,22 +326,26 @@ def _render_combined(weights: dict[str, float], labels: dict[str, str], referenc
 def _group_summary(
     p_keys: list, t_keys: list,
     player_fields: dict, target_fields: dict, mode: str,
+    effective_fn=None,
 ) -> str:
     """Build a compact summary string for an expander header from current session state."""
     p_prefix = f"dm_p_{mode}"
     t_prefix = f"dm_t_{mode}"
+
+    p_vals = {f: st.session_state.get(_field_key(p_prefix, f), player_fields[f][1]) for f in p_keys}
+    t_vals = {f: st.session_state.get(_field_key(t_prefix, f), target_fields[f][1]) for f in t_keys}
+
+    if effective_fn is not None:
+        effective = effective_fn(p_vals, t_vals)
+        return f"Effective: {effective:.2f}×"
+
+    # Fallback for groups without a defined effective multiplier (e.g. Base Attack)
     all_pct = all(f in _PCT_FIELDS or f in _SELECT_FIELDS for f in p_keys + t_keys)
     suf = "%" if all_pct else ""
-
-    p_total = sum(
-        st.session_state.get(_field_key(p_prefix, f), player_fields[f][1]) for f in p_keys
-    )
+    p_total = sum(p_vals.values())
     if not t_keys:
         return f"Player: {p_total:g}{suf}"
-
-    t_total = sum(
-        st.session_state.get(_field_key(t_prefix, f), target_fields[f][1]) for f in t_keys
-    )
+    t_total = sum(t_vals.values())
     net = p_total - t_total
     sign = "+" if net >= 0 else ""
     return f"Player: {p_total:g}{suf}  ·  Target: {t_total:g}{suf}  →  Net: {sign}{net:g}{suf}"
@@ -496,35 +514,73 @@ _manage_builds_panel()
 # ---------------------------------------------------------------------------
 mode = st.radio("Mode", ["PVE", "PVP"], horizontal=True, key="dm_mode")
 
-player_fields = _PVE_PLAYER_FIELDS if mode == "PVE" else _PVP_PLAYER_FIELDS
-target_fields = _PVE_TARGET_FIELDS if mode == "PVE" else _PVP_TARGET_FIELDS
-groups = _PVE_GROUPS if mode == "PVE" else _PVP_GROUPS
+@st.fragment
+def _stat_input_section():
+    _mode = st.session_state.get("dm_mode", "PVE")
+    _player_fields = _PVE_PLAYER_FIELDS if _mode == "PVE" else _PVP_PLAYER_FIELDS
+    _target_fields = _PVE_TARGET_FIELDS if _mode == "PVE" else _PVP_TARGET_FIELDS
+    _groups = _PVE_GROUPS if _mode == "PVE" else _PVP_GROUPS
 
-player_vals: dict = {}
-target_vals: dict = {}
+    # Reset expander states when mode changes so they default to closed for the new mode.
+    if st.session_state.get("dm_mode_prev") != _mode:
+        for _grp_label, *_ in _groups:
+            st.session_state.pop(f"dm_exp_{_grp_label}", None)
+        st.session_state["dm_mode_prev"] = _mode
 
-for grp_label, p_keys, t_keys in groups:
-    icon = _GROUP_ICONS.get(grp_label, '')
-    summary = _group_summary(p_keys, t_keys, player_fields, target_fields, mode)
-    with st.expander(f"{icon} **{grp_label}**  ·  {summary}"):
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.markdown("**Player**")
-            for field in p_keys:
-                label, default = player_fields[field]
-                player_vals[field] = _render_input(
-                    field, label, default, _field_key(f"dm_p_{mode}", field)
-                )
-        with col_b:
-            if t_keys:
-                st.markdown("**Target**")
-            for field in t_keys:
-                label, default = target_fields[field]
-                target_vals[field] = _render_input(
-                    field, label, default, _field_key(f"dm_t_{mode}", field)
-                )
+    _player_vals: dict = {}
+    _target_vals: dict = {}
 
-if st.button("Calculate", key="dm_btn", type="primary", use_container_width=False):
+    for _grp_label, _p_keys, _t_keys, _effective_fn in _groups:
+        _exp_key = f"dm_exp_{_grp_label}"
+        st.session_state.setdefault(_exp_key, False)
+
+        # on_change fires before the rerun, so setting the key here guarantees
+        # the expander re-renders as open when an input inside it changes.
+        def _mark_open(_k=_exp_key):
+            st.session_state[_k] = True
+
+        _icon = _GROUP_ICONS.get(_grp_label, '')
+        _summary = _group_summary(_p_keys, _t_keys, _player_fields, _target_fields, _mode, _effective_fn)
+        with st.expander(f"{_icon} **{_grp_label}**  ·  {_summary}", expanded=st.session_state[_exp_key]):
+            _col_a, _col_b = st.columns(2)
+            with _col_a:
+                st.markdown("**Player**")
+                for _field in _p_keys:
+                    _label, _default = _player_fields[_field]
+                    _player_vals[_field] = _render_input(
+                        _field, _label, _default, _field_key(f"dm_p_{_mode}", _field),
+                        on_change=_mark_open,
+                    )
+            with _col_b:
+                if _t_keys:
+                    st.markdown("**Target**")
+                for _field in _t_keys:
+                    _label, _default = _target_fields[_field]
+                    _target_vals[_field] = _render_input(
+                        _field, _label, _default, _field_key(f"dm_t_{_mode}", _field),
+                        on_change=_mark_open,
+                    )
+
+    # Publish current values so the Calculate button (outside the fragment) can read them.
+    st.session_state["_dm_player_vals"] = _player_vals
+    st.session_state["_dm_target_vals"] = _target_vals
+
+_stat_input_section()
+
+col_calc, col_reset, _ = st.columns([1, 1, 6])
+with col_calc:
+    _do_calculate = st.button("Calculate", key="dm_btn", type="primary", use_container_width=True)
+with col_reset:
+    if st.button("↺ Reset", use_container_width=True, help="Reset all inputs to default values"):
+        _p_fields, _t_fields = _ALL_FIELDS[mode]
+        for _f in _p_fields:
+            st.session_state.pop(_field_key(f"dm_p_{mode}", _f), None)
+        for _f in _t_fields:
+            st.session_state.pop(_field_key(f"dm_t_{mode}", _f), None)
+        st.rerun()
+if _do_calculate:
+    player_vals = st.session_state.get("_dm_player_vals", {})
+    target_vals = st.session_state.get("_dm_target_vals", {})
     p_dec = _pct_to_decimal(player_vals)
     t_dec = _pct_to_decimal(target_vals)
     if mode == "PVE":
@@ -545,7 +601,8 @@ if st.button("Calculate", key="dm_btn", type="primary", use_container_width=Fals
     # Exclude static select-box fields from comparison charts
     weights = {k: v for k, v in weights.items() if k not in _SELECT_FIELDS}
 
-    labels_map = {field: label for field, (label, _) in player_fields.items()}
+    _pf = _PVE_PLAYER_FIELDS if mode == "PVE" else _PVP_PLAYER_FIELDS
+    labels_map = {field: label for field, (label, _) in _pf.items()}
     positive_weights = {k: v for k, v in weights.items() if v > 0}
 
     # Persist results so reruns from the reference selectbox don't clear them.
