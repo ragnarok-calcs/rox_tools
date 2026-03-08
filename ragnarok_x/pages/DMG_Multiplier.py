@@ -22,10 +22,10 @@ st.caption(
 # Field definitions: {field: (label, default)}
 # ---------------------------------------------------------------------------
 _PVE_PLAYER_FIELDS = {
-    'patk':                 ('P.ATK',                  1000.0),
+    'patk':                 ('P.ATK',                  1000),
     'crit_dmg_bonus':       ('Crit DMG Bonus %',        200),
-    'pdmg_bonus':           ('P.DMG Bonus',             0.0),
-    'pdmg_bonus_pct':       ('P.DMG Bonus%',            0.0),
+    'pdmg_bonus':           ('P.DMG Bonus',             0),
+    'pdmg_bonus_pct':       ('P.DMG Bonus%',            0),
     'final_pdmg_bonus':     ('Final P.DMG Bonus %',     0),
     'elemental_counter':    ('Elemental Counter %',      100),
     'element_enhance':      ('Element Enhance %',        0),
@@ -37,15 +37,15 @@ _PVE_PLAYER_FIELDS = {
 }
 _PVE_TARGET_FIELDS = {
     'crit_dmg_reduc':   ('Crit DMG Reduction %',     0),
-    'pdmg_reduc':       ('P.DMG Reduction',           0.0),
+    'pdmg_reduc':       ('P.DMG Reduction',           0),
     'final_pdmg_reduc': ('Final P.DMG Reduction %',   0),
     'final_dmg_reduc':  ('Final DMG Reduction %',     0),
 }
 _PVP_PLAYER_FIELDS = {
-    'patk':                 ('P.ATK',                  1000.0),
+    'patk':                 ('P.ATK',                  1000),
     'crit_dmg_bonus':       ('Crit DMG Bonus %',        200),
-    'pdmg_bonus':           ('P.DMG Bonus',             0.0),
-    'pdmg_bonus_pct':       ('P.DMG Bonus%',            0.0),
+    'pdmg_bonus':           ('P.DMG Bonus',             0),
+    'pdmg_bonus_pct':       ('P.DMG Bonus%',            0),
     'final_pdmg_bonus':     ('Final P.DMG Bonus %',     0),
     'weapon_size_modifier': ('Weapon Size Modifier %',   100),
     'size_enhance':         ('Bonus DMG to Size %',      0),
@@ -54,7 +54,7 @@ _PVP_PLAYER_FIELDS = {
     'element_enhance':      ('Element Enhance %',        0),
     'final_dmg_bonus':      ('Final DMG Bonus %',        0),
     'pvp_final_pdmg_bonus': ('PVP Final P.DMG Bonus %',  0),
-    'pvp_pdmg_bonus':       ('PVP P.DMG Bonus',         0.0),
+    'pvp_pdmg_bonus':       ('PVP P.DMG Bonus',         0),
 }
 _PVP_TARGET_FIELDS = {
     'crit_dmg_reduc':       ('Crit DMG Reduction %',        0),
@@ -64,7 +64,7 @@ _PVP_TARGET_FIELDS = {
     'size_reduc':           ('Size Reduction %',             0),
     'race_reduc':           ('Race Reduction %',             0),
     'final_dmg_reduc':      ('Final DMG Reduction %',        0),
-    'pvp_pdmg_reduc':       ('PVP P.DMG Reduction',          0.0),
+    'pvp_pdmg_reduc':       ('PVP P.DMG Reduction',          0),
     'pvp_final_pdmg_reduc': ('PVP Final P.DMG Reduction %',  0),
 }
 
@@ -82,6 +82,9 @@ _PCT_FIELDS = {
     'crit_dmg_reduc', 'final_pdmg_reduc', 'element_resist', 'size_reduc',
     'race_reduc', 'final_dmg_reduc', 'pvp_final_pdmg_reduc',
 }
+
+# Flat stat fields entered as integers (not percentage, not float).
+_INT_FIELDS = {'patk', 'pdmg_bonus', 'pdmg_bonus_pct', 'pdmg_reduc', 'pvp_pdmg_bonus', 'pvp_pdmg_reduc'}
 
 # Fields rendered as selectboxes: {field: [option_ints]}
 _SELECT_FIELDS = {
@@ -152,6 +155,8 @@ def _render_input(field: str, label: str, default, key: str, on_change=None):
             format_func=lambda x: f"{x}%", key=key, **kwargs,
         )
     elif field in _PCT_FIELDS:
+        return st.number_input(label, value=int(default), min_value=0, step=1, key=key, **kwargs)
+    elif field in _INT_FIELDS:
         return st.number_input(label, value=int(default), min_value=0, step=1, key=key, **kwargs)
     else:
         return st.number_input(label, value=default, min_value=0.0, key=key, **kwargs)
