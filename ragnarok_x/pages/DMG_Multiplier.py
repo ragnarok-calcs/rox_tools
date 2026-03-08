@@ -33,7 +33,7 @@ _PVE_PLAYER_FIELDS = {
     'bonus_dmg_race':       ('Bonus DMG to Race %',      0),
     'final_dmg_bonus':      ('Final DMG Bonus %',        0),
     'weapon_size_modifier': ('Weapon Size Modifier %',   100),
-    'size_enhance':         ('Size Enhance %',           0),
+    'size_enhance':         ('Bonus DMG to Size %',      0),
 }
 _PVE_TARGET_FIELDS = {
     'crit_dmg_reduc':   ('Crit DMG Reduction %',     0),
@@ -48,7 +48,7 @@ _PVP_PLAYER_FIELDS = {
     'pdmg_bonus_pct':       ('P.DMG Bonus%',            0.0),
     'final_pdmg_bonus':     ('Final P.DMG Bonus %',     0),
     'weapon_size_modifier': ('Weapon Size Modifier %',   100),
-    'size_enhance':         ('Size Enhance %',           0),
+    'size_enhance':         ('Bonus DMG to Size %',      0),
     'bonus_dmg_race':       ('Bonus DMG to Race %',      0),
     'elemental_counter':    ('Elemental Counter %',      100),
     'element_enhance':      ('Element Enhance %',        0),
@@ -87,6 +87,18 @@ _PCT_FIELDS = {
 _SELECT_FIELDS = {
     'weapon_size_modifier': [75, 100],
     'elemental_counter':    [0, 25, 50, 70, 75, 90, 100, 125, 150, 175],
+}
+
+# Icons for stat group expander headers
+_GROUP_ICONS = {
+    'Base Attack': '⚔️',
+    'Crit':        '💥',
+    'Final P.DMG': '🎯',
+    'Size':        '📏',
+    'Element':     '🌀',
+    'Race':        '👥',
+    'Final DMG':   '🔥',
+    'PVP DMG':     '⚡',
 }
 
 # Grouped layout: list of (header, [player_fields], [target_fields])
@@ -168,43 +180,133 @@ def _normalize_weights(weights: dict[str, float]) -> dict[str, float]:
     return {k: v / max_w for k, v in weights.items()}
 
 
+def _gradient_colors(values: list) -> list:
+    """Interpolate colors gold → green → steel-blue based on normalized value."""
+    anchors = [
+        (1.0, (255, 215,   0)),  # gold
+        (0.5, ( 46, 204, 113)),  # green
+        (0.0, ( 93, 173, 226)),  # steel blue
+    ]
+    colors = []
+    for v in values:
+        v = max(0.0, min(1.0, v))
+        color = (93, 173, 226)
+        for i in range(len(anchors) - 1):
+            hi_v, hi_c = anchors[i]
+            lo_v, lo_c = anchors[i + 1]
+            if v >= lo_v:
+                t = (v - lo_v) / (hi_v - lo_v) if hi_v != lo_v else 1.0
+                r = int(lo_c[0] + t * (hi_c[0] - lo_c[0]))
+                g = int(lo_c[1] + t * (hi_c[1] - lo_c[1]))
+                b = int(lo_c[2] + t * (hi_c[2] - lo_c[2]))
+                color = (r, g, b)
+                break
+        colors.append(f'#{color[0]:02x}{color[1]:02x}{color[2]:02x}')
+    return colors
+
+
 def _weight_chart(weights: dict[str, float], labels: dict[str, str]) -> go.Figure:
     norm = _normalize_weights(weights)
     sorted_items = sorted(norm.items(), key=lambda x: x[1], reverse=True)
     readable = [labels[k] for k, _ in sorted_items]
     values = [v for _, v in sorted_items]
     raw_values = [weights[k] for k, _ in sorted_items]
-    colors = ['#2ecc71' if v >= 0 else '#e74c3c' for v in values]
+    colors = _gradient_colors(values)
+    text_labels = [f"{v:.2f}" for v in values]
 
     fig = go.Figure(go.Bar(
         x=values, y=readable, orientation='h',
-        marker_color=colors, customdata=raw_values,
+        marker=dict(color=colors, line=dict(width=0)),
+        customdata=raw_values,
+        text=text_labels,
+        textposition='outside',
+        textfont=dict(size=11),
         hovertemplate='<b>%{y}</b><br>Relative weight: %{x:.3f}<br>Raw weight: %{customdata:.4f}<extra></extra>',
     ))
     fig.update_layout(
-        xaxis=dict(title="Relative weight (best stat = 1.0)", range=[0, 1.05]),
-        yaxis=dict(autorange='reversed'),
-        margin=dict(l=0, r=20, t=20, b=40),
-        height=80 + 36 * len(weights),
+        xaxis=dict(
+            title="Relative weight (best stat = 1.0)",
+            range=[0, 1.25],
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+            tickfont=dict(size=11),
+        ),
+        yaxis=dict(autorange='reversed', showgrid=False, tickfont=dict(size=12)),
+        margin=dict(l=0, r=50, t=10, b=40),
+        height=60 + 40 * len(weights),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
     )
     return fig
 
 
-def _render_equivalence(weights: dict[str, float], labels: dict[str, str], reference: str):
+def _rank_color(rank: int) -> tuple:
+    """Return (bg_color, text_color) for a rank badge."""
+    if rank == 0:
+        return ('#FFD700', '#1a1a1a')   # gold
+    elif rank <= 2:
+        return ('#2ecc71', '#ffffff')   # green
+    else:
+        return ('#5dade2', '#ffffff')   # steel blue
+
+
+def _render_combined(weights: dict[str, float], labels: dict[str, str], reference: str):
+    """Priority bars normalized to the selected reference, with equivalence column."""
     ref_w = weights[reference]
+    max_w = max(weights.values())
     sorted_items = sorted(
         [(k, v) for k, v in weights.items() if v > 0],
         key=lambda x: x[1], reverse=True,
     )
-    hdr_name, hdr_bar, hdr_val = st.columns([3, 5, 2])
-    hdr_name.caption("Stat")
-    hdr_bar.caption("Relative priority")
-    hdr_val.caption(f"Per 1 {labels[reference]}")
-    for field, w in sorted_items:
-        col_name, col_bar, col_val = st.columns([3, 5, 2])
-        col_name.markdown(f"**{labels[field]}**")
-        col_bar.progress(min(w / ref_w, 1.0))
-        col_val.markdown(f"`{ref_w / w:.2f}`")
+
+    ref_label = labels[reference]
+    header_html = f"""
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;
+                padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.15);
+                color:#888; font-size:11px; text-transform:uppercase; letter-spacing:1px;">
+        <div style="width:26px; flex-shrink:0;"></div>
+        <div style="flex:2;">Stat</div>
+        <div style="flex:3;">Relative Priority</div>
+        <div style="flex:1; text-align:right; padding-right:8px;">Score</div>
+        <div style="flex:1; text-align:right;">Per 1 {ref_label}</div>
+    </div>
+    """
+
+    rows_html = ""
+    for rank, (field, w) in enumerate(sorted_items):
+        label = labels[field]
+        is_ref = field == reference
+        norm_score = w / max_w
+        equiv = ref_w / w
+        bg_color, txt_color = _rank_color(rank)
+        bar_width = int(norm_score * 100)
+        name_style = "font-weight:700;" if is_ref else ""
+        ref_star = " ★" if is_ref else ""
+        equiv_str = "1.00×" if is_ref else f"{equiv:.2f}×"
+
+        rows_html += f"""
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+            <div style="background:{bg_color}; color:{txt_color}; border-radius:50%;
+                        width:26px; height:26px; display:flex; align-items:center;
+                        justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">
+                {rank + 1}
+            </div>
+            <div style="flex:2; font-size:13px; {name_style}">{label}{ref_star}</div>
+            <div style="flex:3; background:rgba(255,255,255,0.08); border-radius:4px; height:14px; overflow:hidden;">
+                <div style="width:{bar_width}%; height:100%; background:{bg_color};
+                            border-radius:4px;"></div>
+            </div>
+            <div style="flex:1; text-align:right; font-family:monospace; font-size:13px; color:#ccc; padding-right:8px;">
+                {norm_score:.2f}
+            </div>
+            <div style="flex:1; text-align:right; font-family:monospace; font-size:13px; color:#aaa;">
+                {equiv_str}
+            </div>
+        </div>
+        """
+
+    st.html(header_html + rows_html)
 
 
 def _group_summary(
@@ -402,8 +504,9 @@ player_vals: dict = {}
 target_vals: dict = {}
 
 for grp_label, p_keys, t_keys in groups:
+    icon = _GROUP_ICONS.get(grp_label, '')
     summary = _group_summary(p_keys, t_keys, player_fields, target_fields, mode)
-    with st.expander(f"**{grp_label}**  ·  {summary}"):
+    with st.expander(f"{icon} **{grp_label}**  ·  {summary}"):
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown("**Player**")
@@ -421,7 +524,7 @@ for grp_label, p_keys, t_keys in groups:
                     field, label, default, _field_key(f"dm_t_{mode}", field)
                 )
 
-if st.button("Calculate", key="dm_btn"):
+if st.button("Calculate", key="dm_btn", type="primary", use_container_width=False):
     p_dec = _pct_to_decimal(player_vals)
     t_dec = _pct_to_decimal(target_vals)
     if mode == "PVE":
@@ -439,55 +542,71 @@ if st.button("Calculate", key="dm_btn"):
     # weights represent change-per-1-unit-of-user-input across all stat types.
     weights = {k: (v * 0.01 if k in _PCT_FIELDS else v) for k, v in weights.items()}
 
+    # Exclude static select-box fields from comparison charts
+    weights = {k: v for k, v in weights.items() if k not in _SELECT_FIELDS}
+
     labels_map = {field: label for field, (label, _) in player_fields.items()}
-    positive_weights = {
-        k: v for k, v in weights.items()
-        if v > 0 and k not in _SELECT_FIELDS
-    }
+    positive_weights = {k: v for k, v in weights.items() if v > 0}
 
     # Persist results so reruns from the reference selectbox don't clear them.
     st.session_state["dm_results"] = {
-        "multiplier":      multiplier,
-        "weights":         weights,
-        "labels_map":      labels_map,
+        "multiplier":       multiplier,
+        "weights":          weights,
+        "labels_map":       labels_map,
         "positive_weights": positive_weights,
-        "best_stat":       max(positive_weights, key=positive_weights.get),
+        "best_stat":        max(positive_weights, key=positive_weights.get),
     }
     # Reset reference stat so it defaults to the best stat on new calculations.
     st.session_state.pop("dm_ref", None)
 
 if "dm_results" in st.session_state:
-    res             = st.session_state["dm_results"]
-    multiplier      = res["multiplier"]
-    weights         = res["weights"]
-    labels_map      = res["labels_map"]
+    res              = st.session_state["dm_results"]
+    multiplier       = res["multiplier"]
+    weights          = res["weights"]
+    labels_map       = res["labels_map"]
     positive_weights = res["positive_weights"]
-    best_stat       = res["best_stat"]
+    best_stat        = res["best_stat"]
 
-    st.metric("Damage Multiplier", f"{multiplier:,.2f}")
+    # Hero metric card
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(231,76,60,0.15) 0%, rgba(26,26,46,0.6) 100%);
+                border: 1px solid rgba(231,76,60,0.5); border-radius: 12px;
+                padding: 20px 32px; text-align: center; margin: 16px 0;">
+        <div style="font-size: 12px; color: #aaa; letter-spacing: 2px;
+                    text-transform: uppercase; margin-bottom: 4px;">
+            Damage Multiplier
+        </div>
+        <div style="font-size: 56px; font-weight: 800; color: #e74c3c; line-height: 1.1;">
+            {multiplier:,.2f}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col_priority, col_equiv = st.columns(2)
+    st.divider()
 
-    with col_priority:
-        st.markdown("#### Stat Priority")
-        st.caption(
-            "All stats normalized so the highest-priority stat = 1.0. "
-            "A stat with value 0.2 means you need **5× as many points** of it to match 1 point of the top stat. "
-            "Hover for raw values."
-        )
-        st.plotly_chart(_weight_chart(weights, labels_map), width="stretch")
+    st.markdown("#### Stat Priority")
+    st.caption(
+        "Bars show relative priority vs the selected reference stat (★). "
+        "Score is always normalized to the absolute best stat = 1.00. "
+        "The equivalence column shows how many points of each stat equal 1 point of the reference."
+    )
+    # Best stat callout
+    st.markdown(f"""
+    <div style="background: rgba(46,204,113,0.1); border-left: 3px solid #2ecc71;
+                border-radius: 0 6px 6px 0; padding: 8px 14px; margin-bottom: 12px;">
+        <span style="color:#2ecc71; font-weight:700;">▲ Top priority: {labels_map[best_stat]}</span>
+        <span style="color:#aaa; font-size:13px;"> — invest here for the greatest DPS gain per point.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    with col_equiv:
-        st.markdown("#### Stat Equivalence")
-        st.caption("Select a reference stat to see how many points of every other stat equal 1 point of it.")
-        ref_options = list(positive_weights.keys())
-        current_ref = st.session_state.get("dm_ref", best_stat)
-        if current_ref not in ref_options:
-            current_ref = best_stat
-        reference = st.selectbox(
-            "Reference stat", options=ref_options,
-            format_func=lambda k: labels_map[k],
-            index=ref_options.index(current_ref),
-            key="dm_ref",
-        )
-        _render_equivalence(positive_weights, labels_map, reference)
+    ref_options = sorted(positive_weights.keys(), key=lambda k: labels_map[k])
+    current_ref = st.session_state.get("dm_ref", best_stat)
+    if current_ref not in ref_options:
+        current_ref = best_stat
+    reference = st.selectbox(
+        "Reference stat for equivalence", options=ref_options,
+        format_func=lambda k: labels_map[k],
+        index=ref_options.index(current_ref),
+        key="dm_ref",
+    )
+    _render_combined(positive_weights, labels_map, reference)
