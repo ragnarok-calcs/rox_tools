@@ -1,0 +1,24 @@
+0:
+  base:
+    weapon: Oridicon
+    armor: Elunium
+    accessory: Bradium
+  protection:
+    weapon: None
+    armor: None
+    accessory: None
+  blessing:
+    weapon: None
+    armor: None
+    accessory: None
+1:
+  material:
+    base:
+      name: Oridicon
+      quant: 24
+    protection:
+      name: None
+      quant: 0
+    blessing:
+      name: None
+      quant: 0

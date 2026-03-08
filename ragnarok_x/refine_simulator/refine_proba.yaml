@@ -1,0 +1,133 @@
+Base:
+  0:
+    Success: 1
+    Failure: 0
+    Downgrade: 0
+    Break: 0
+  1:
+    Success: .5
+    Failure: .5
+    Downgrade: 0
+    Break: 0
+  2:
+    Success: .33
+    Failure: .67
+    Downgrade: 0
+    Break: 0
+  3:
+    Success: .25
+    Failure: .75
+    Downgrade: 0
+    Break: 0
+  4:
+    Success: .25
+    Failure: .4
+    Downgrade: .25
+    Break: .1
+  5:
+    Success: .25
+    Failure: .4
+    Downgrade: .25
+    Break: .1
+  6:
+    Success: .20
+    Failure: .4
+    Downgrade: .25
+    Break: .15
+  7:
+    Success: .20
+    Failure: .4
+    Downgrade: .25
+    Break: .15
+  8:
+    Success: .20
+    Failure: .35
+    Downgrade: .30
+    Break: .15
+  9:
+    Success: .20
+    Failure: .35
+    Downgrade: .30
+    Break: .15
+  10:
+    Success: .20
+    Failure: .30
+    Downgrade: .30
+    Break: .20
+  11:
+    Success: .20
+    Failure: .30
+    Downgrade: .30
+    Break: .20
+  12:
+    Success: .20
+    Failure: .25
+    Downgrade: .30
+    Break: .25
+  13:
+    Success: .15
+    Failure: .20
+    Downgrade: .35
+    Break: .30
+  14:
+    Success: .15
+    Failure: .15
+    Downgrade: .35
+    Break: .35
+
+Safe:
+  4:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  5:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  6:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  7:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  8:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  9:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  10:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  11:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  12:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  13:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
+  14:
+    Success: .15
+    Failure: .75
+    Downgrade: 0
+    Break: .1
