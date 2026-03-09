@@ -391,6 +391,7 @@ def _build_panel(store_key: str, apply_fn, label_prefix: str, mode: str, fields:
     if has_builds and selected in compatible and selected != last_applied:
         apply_fn(compatible[selected])
         st.session_state[last_applied_key] = selected
+        st.session_state[f"{label_prefix}_name"] = selected
         st.rerun(scope="app")
 
     # --- Save current as new build ---
@@ -672,3 +673,99 @@ if "dm_results" in st.session_state:
         key="dm_ref",
     )
     _render_combined(positive_weights, labels_map, reference)
+
+
+# ---------------------------------------------------------------------------
+# Build Comparison Panel
+# ---------------------------------------------------------------------------
+st.divider()
+st.markdown("### Build Comparison")
+st.caption(
+    "Compare damage multipliers for saved player builds against a fixed target. "
+    "Select a target, pick one or more player builds, and the chart updates automatically."
+)
+
+cmp_mode = st.radio("Comparison Mode", ["PVE", "PVP"], horizontal=True, key="cmp_mode")
+
+_cmp_p_fields = _PVE_PLAYER_FIELDS if cmp_mode == "PVE" else _PVP_PLAYER_FIELDS
+_cmp_t_fields = _PVE_TARGET_FIELDS if cmp_mode == "PVE" else _PVP_TARGET_FIELDS
+
+_cmp_player_builds = {
+    k: v for k, v in st.session_state.get("player_builds", {}).items()
+    if v.get("mode") == cmp_mode
+}
+_cmp_target_builds = {
+    k: v for k, v in st.session_state.get("target_builds", {}).items()
+    if v.get("mode") == cmp_mode
+}
+
+col_cmp_t, col_cmp_p = st.columns(2)
+
+with col_cmp_t:
+    st.markdown("**Target**")
+    _target_opts = ["— Current target —"] + list(_cmp_target_builds.keys())
+    _sel_target = st.selectbox("Target", _target_opts, label_visibility="collapsed", key="cmp_target_sel")
+
+with col_cmp_p:
+    st.markdown("**Player Builds**")
+    if _cmp_player_builds:
+        _sel_builds = st.multiselect(
+            "Player builds", options=list(_cmp_player_builds.keys()),
+            label_visibility="collapsed", key="cmp_build_sel",
+        )
+    else:
+        st.caption(f"No {cmp_mode} player builds saved.")
+        _sel_builds = []
+
+if _sel_builds:
+    # Resolve target stats
+    if _sel_target == "— Current target —":
+        _t_raw = {
+            f: st.session_state.get(_field_key(f"dm_t_{cmp_mode}", f), default)
+            for f, (_, default) in _cmp_t_fields.items()
+        }
+    else:
+        _t_raw = {
+            f: _cmp_target_builds[_sel_target]["stats"].get(f, default)
+            for f, (_, default) in _cmp_t_fields.items()
+        }
+    _t_dec = _pct_to_decimal(_t_raw)
+
+    # Calculate multiplier for each selected build
+    _cmp_results = {}
+    for _bname in _sel_builds:
+        _p_raw = {
+            f: _cmp_player_builds[_bname]["stats"].get(f, default)
+            for f, (_, default) in _cmp_p_fields.items()
+        }
+        _p_dec = _pct_to_decimal(_p_raw)
+        if cmp_mode == "PVE":
+            _cmp_results[_bname] = pve_calculate_multiplier(PVEPlayerStats(**_p_dec), PVETargetStats(**_t_dec))
+        else:
+            _cmp_results[_bname] = pvp_calculate_multiplier(PVPPlayerStats(**_p_dec), PVPTargetStats(**_t_dec))
+
+    _sorted = sorted(_cmp_results.items(), key=lambda x: x[1], reverse=True)
+    _names  = [k for k, _ in _sorted]
+    _values = [v for _, v in _sorted]
+    _max    = max(_values)
+    _colors = _gradient_colors([v / _max for v in _values])
+
+    _cmp_fig = go.Figure(go.Bar(
+        x=_values, y=_names, orientation='h',
+        marker=dict(color=_colors, line=dict(width=0)),
+        text=[f"{v:,.2f}" for v in _values],
+        textposition='outside',
+        textfont=dict(size=11),
+        hovertemplate='<b>%{y}</b><br>Multiplier: %{x:,.2f}<extra></extra>',
+    ))
+    _cmp_fig.update_layout(
+        xaxis=dict(title="Damage Multiplier", showgrid=False, zeroline=False, showline=False),
+        yaxis=dict(autorange='reversed', showgrid=False, tickfont=dict(size=12)),
+        margin=dict(l=0, r=80, t=10, b=40),
+        height=60 + 40 * len(_cmp_results),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+    )
+    st.plotly_chart(_cmp_fig, use_container_width=True)
+else:
+    st.info(f"Select at least one {cmp_mode} player build above to see the comparison.")
