@@ -126,20 +126,22 @@ _PEN_GROUP = (
     _pen_effective_fn,
 )
 
-# Fields exclusive to each damage-type group that swap when toggling Crit ↔ Pen.
-# Streamlit GCs widget keys for non-rendered widgets, so these must be
-# backed up / restored across toggles.
-_CRIT_SWAP_FIELDS = ('crit_dmg_bonus', 'crit_dmg_reduc')
-_PEN_SWAP_FIELDS = ('total_final_pen', 'total_final_def')
 
+def _get_groups(mode: str) -> list:
+    """Return stat input groups with both Crit and Pen always present.
 
-def _get_groups(mode: str, dmg_type: str) -> list:
-    """Return the stat input groups for the given mode and damage type."""
+    Both groups are always rendered so Streamlit preserves their widget
+    state across damage-type toggles.
+    """
     base = _PVE_GROUPS if mode == "PVE" else _PVP_GROUPS
-    if dmg_type == "Crit":
-        return base
-    # Swap the "Crit" group for the "Penetration" group
-    return [_PEN_GROUP if g[0] == "Crit" else g for g in base]
+    result = []
+    for g in base:
+        if g[0] == "Crit":
+            result.append(g)
+            result.append(_PEN_GROUP)
+        else:
+            result.append(g)
+    return result
 
 
 # Grouped layout: list of (header, [player_fields], [target_fields])
@@ -579,41 +581,16 @@ def _stat_input_section():
     _dmg_type = st.session_state.get("dm_dmg_type", "Crit")
     _player_fields = _PVE_PLAYER_FIELDS if _mode == "PVE" else _PVP_PLAYER_FIELDS
     _target_fields = _PVE_TARGET_FIELDS if _mode == "PVE" else _PVP_TARGET_FIELDS
-    _groups = _get_groups(_mode, _dmg_type)
+    _groups = _get_groups(_mode)
 
-    # Reset expander states when mode or damage type changes.
-    _state_key = f"{_mode}_{_dmg_type}"
-    _prev_key = st.session_state.get("dm_state_key_prev")
-    if _prev_key != _state_key:
-        # Transfer open/closed state between Crit ↔ Penetration expanders
-        _crit_exp = st.session_state.get("dm_exp_Crit", False)
-        _pen_exp = st.session_state.get("dm_exp_Penetration", False)
+    # Reset all expander states when the mode changes (PVE↔PVP).
+    _state_key = f"{_mode}"
+    _prev_mode = st.session_state.get("dm_mode_prev")
+    if _prev_mode != _state_key:
         for _lbl in ["Base Attack", "Crit", "Penetration", "Final P.DMG",
                      "Size", "Element", "Race", "Final DMG", "PVP DMG"]:
             st.session_state.pop(f"dm_exp_{_lbl}", None)
-        # Only carry over when the damage type changed (not the mode)
-        if _prev_key is not None and _prev_key.split("_")[0] == _mode:
-            # Determine which fields are swapping out / in
-            if _dmg_type == "Penetration":
-                _out_fields, _in_fields = _CRIT_SWAP_FIELDS, _PEN_SWAP_FIELDS
-                st.session_state["dm_exp_Penetration"] = _crit_exp
-            else:
-                _out_fields, _in_fields = _PEN_SWAP_FIELDS, _CRIT_SWAP_FIELDS
-                st.session_state["dm_exp_Crit"] = _pen_exp
-            # Backup outgoing widget values before Streamlit GCs them
-            for _f in _out_fields:
-                for _pfx in (f"dm_p_{_mode}", f"dm_t_{_mode}"):
-                    _k = _field_key(_pfx, _f)
-                    if _k in st.session_state:
-                        st.session_state[f"_bak_{_k}"] = st.session_state[_k]
-            # Restore incoming widget values from previous backup
-            for _f in _in_fields:
-                for _pfx in (f"dm_p_{_mode}", f"dm_t_{_mode}"):
-                    _k = _field_key(_pfx, _f)
-                    _bak = f"_bak_{_k}"
-                    if _bak in st.session_state:
-                        st.session_state[_k] = st.session_state.pop(_bak)
-        st.session_state["dm_state_key_prev"] = _state_key
+        st.session_state["dm_mode_prev"] = _state_key
 
     _player_vals: dict = {}
     _target_vals: dict = {}
@@ -624,12 +601,17 @@ def _stat_input_section():
 
         # on_change fires before the rerun, so setting the key here guarantees
         # the expander re-renders as open when an input inside it changes.
+        # Suppressed during programmatic resets to prevent all expanders opening.
         def _mark_open(_k=_exp_key):
-            st.session_state[_k] = True
+            if not st.session_state.get("_dm_resetting"):
+                st.session_state[_k] = True
 
         _icon = _GROUP_ICONS.get(_grp_label, '')
         _summary = _group_summary(_p_keys, _t_keys, _player_fields, _target_fields, _mode, _effective_fn)
-        with st.expander(f"{_icon} **{_grp_label}**  ·  {_summary}", expanded=st.session_state[_exp_key]):
+        # Keep the label stable across damage-type toggles — label changes cause
+        # Streamlit to treat the expander as a new component and reset its state.
+        _header = f"{_icon} **{_grp_label}**  ·  {_summary}"
+        with st.expander(_header, expanded=st.session_state[_exp_key]):
             _col_a, _col_b = st.columns(2)
             with _col_a:
                 st.markdown("**Player**")
@@ -652,20 +634,32 @@ def _stat_input_section():
     # Publish current values so the Calculate button (outside the fragment) can read them.
     st.session_state["_dm_player_vals"] = _player_vals
     st.session_state["_dm_target_vals"] = _target_vals
+    # Clear the reset flag so future interactions work normally.
+    st.session_state.pop("_dm_resetting", None)
 
 _stat_input_section()
+
+def _reset_inputs():
+    """on_click callback — runs at the start of the rerun, before widgets are instantiated."""
+    _mode = st.session_state.get("dm_mode", "PVE")
+    _p_fields, _t_fields = _ALL_FIELDS[_mode]
+    # Set keys to defaults (not pop) so widgets re-render with correct values.
+    for _f, (_, _default) in _p_fields.items():
+        st.session_state[_field_key(f"dm_p_{_mode}", _f)] = int(_default) if _f in _SELECT_FIELDS else _default
+    for _f, (_, _default) in _t_fields.items():
+        st.session_state[_field_key(f"dm_t_{_mode}", _f)] = _default
+    # Suppress _mark_open callbacks that would otherwise fire for every
+    # changed input and force all expanders open.
+    st.session_state["_dm_resetting"] = True
+    st.session_state.pop("dm_results", None)
+
 
 col_calc, col_reset, _ = st.columns([1, 1, 6])
 with col_calc:
     _do_calculate = st.button("Calculate", key="dm_btn", type="primary", use_container_width=True)
 with col_reset:
-    if st.button("↺ Reset", use_container_width=True, help="Reset all inputs to default values"):
-        _p_fields, _t_fields = _ALL_FIELDS[mode]
-        for _f in _p_fields:
-            st.session_state.pop(_field_key(f"dm_p_{mode}", _f), None)
-        for _f in _t_fields:
-            st.session_state.pop(_field_key(f"dm_t_{mode}", _f), None)
-        st.rerun()
+    st.button("↺ Reset", use_container_width=True, help="Reset all inputs to default values",
+              on_click=_reset_inputs)
 if _do_calculate:
     player_vals = st.session_state.get("_dm_player_vals", {})
     target_vals = st.session_state.get("_dm_target_vals", {})
