@@ -3,6 +3,7 @@ from .pve_multiplier import (
     TargetStats as PVETargetStats,
     calculate_multiplier as pve_calculate_multiplier,
     modifier_weights as pve_modifier_weights,
+    pen_multiplier,
 )
 from .pvp_multiplier import (
     PlayerStats as PVPPlayerStats,

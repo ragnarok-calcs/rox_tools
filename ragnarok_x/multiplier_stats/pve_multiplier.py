@@ -52,7 +52,7 @@ class TargetStats:
 #   pen_mult = (1 + pen_diff)           if pen_diff <= 1.5
 #            = (1 + pen_diff×2 - 1.5)   if pen_diff >  1.5
 # ---------------------------------------------------------------------------
-def _pen_multiplier(pen_diff: float) -> float:
+def pen_multiplier(pen_diff: float) -> float:
     if pen_diff <= 1.5:
         return 1.0 + pen_diff
     return 1.0 + pen_diff * 2.0 - 1.5
@@ -66,7 +66,7 @@ def calculate_multiplier(
     damage_type: "crit" (default) or "pen" (penetration).
     """
     if damage_type == "pen":
-        atk_mult = _pen_multiplier(player.total_final_pen - target.total_final_def)
+        atk_mult = pen_multiplier(player.total_final_pen - target.total_final_def)
     else:
         atk_mult = player.crit_dmg_bonus - target.crit_dmg_reduc
 

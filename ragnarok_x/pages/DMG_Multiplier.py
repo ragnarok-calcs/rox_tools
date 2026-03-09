@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from multiplier_stats import (
     PVEPlayerStats, PVETargetStats, pve_calculate_multiplier, pve_modifier_weights,
     PVPPlayerStats, PVPTargetStats, pvp_calculate_multiplier, pvp_modifier_weights,
+    pen_multiplier,
 )
 
 st.set_page_config(page_title="DMG Multiplier", layout="wide")
@@ -115,9 +116,7 @@ _GROUP_ICONS = {
 def _pen_effective_fn(p_vals: dict, t_vals: dict) -> float:
     """Compute the penetration ATK multiplier from raw UI values (integer %)."""
     pen_diff = (p_vals.get('total_final_pen', 0) - t_vals.get('total_final_def', 0)) / 100.0
-    if pen_diff <= 1.5:
-        return 1.0 + pen_diff
-    return 1.0 + pen_diff * 2.0 - 1.5
+    return pen_multiplier(pen_diff)
 
 
 _PEN_GROUP = (
@@ -187,9 +186,7 @@ def _render_input(field: str, label: str, default, key: str, on_change=None):
             label, options=options, index=options.index(int(default)),
             format_func=lambda x: f"{x}%", key=key, **kwargs,
         )
-    elif field in _PCT_FIELDS:
-        return st.number_input(label, value=int(default), min_value=0, step=1, key=key, **kwargs)
-    elif field in _INT_FIELDS:
+    elif field in _PCT_FIELDS or field in _INT_FIELDS:
         return st.number_input(label, value=int(default), min_value=0, step=1, key=key, **kwargs)
     else:
         return st.number_input(label, value=default, min_value=0.0, key=key, **kwargs)
@@ -225,6 +222,49 @@ def _pct_to_decimal(vals: dict) -> dict:
     return {k: v / 100.0 if k in _PCT_FIELDS else v for k, v in vals.items()}
 
 
+def _read_from_build(build_stats: dict, fields: dict) -> dict:
+    """Read stat values from a saved build dict, falling back to field defaults."""
+    return {f: build_stats.get(f, default) for f, (_, default) in fields.items()}
+
+
+def _calculate(mode: str, p_dec: dict, t_dec: dict, dmg_type: str) -> float:
+    """Dispatch to the correct PVE/PVP multiplier calculation."""
+    if mode == "PVE":
+        return pve_calculate_multiplier(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type)
+    return pvp_calculate_multiplier(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type)
+
+
+def _weights(mode: str, p_dec: dict, t_dec: dict, dmg_type: str) -> dict[str, float]:
+    """Dispatch to the correct PVE/PVP modifier weights calculation."""
+    if mode == "PVE":
+        return pve_modifier_weights(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type)
+    return pvp_modifier_weights(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type)
+
+
+def _make_bar_chart(
+    values: list, labels: list, colors: list,
+    x_title: str = "", hover_tpl: str = "", right_margin: int = 80,
+) -> go.Figure:
+    """Create a horizontal bar chart with shared layout conventions."""
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation='h',
+        marker=dict(color=colors, line=dict(width=0)),
+        text=[f"{v:,.2f}" for v in values],
+        textposition='outside',
+        textfont=dict(size=11),
+        hovertemplate=hover_tpl,
+    ))
+    fig.update_layout(
+        xaxis=dict(title=x_title, showgrid=False, zeroline=False, showline=False),
+        yaxis=dict(autorange='reversed', showgrid=False, tickfont=dict(size=12)),
+        margin=dict(l=0, r=right_margin, t=10, b=40),
+        height=60 + 40 * len(values),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+    )
+    return fig
+
+
 def _normalize_weights(weights: dict[str, float]) -> dict[str, float]:
     max_w = max(abs(v) for v in weights.values())
     if max_w == 0:
@@ -255,42 +295,6 @@ def _gradient_colors(values: list) -> list:
                 break
         colors.append(f'#{color[0]:02x}{color[1]:02x}{color[2]:02x}')
     return colors
-
-
-def _weight_chart(weights: dict[str, float], labels: dict[str, str]) -> go.Figure:
-    norm = _normalize_weights(weights)
-    sorted_items = sorted(norm.items(), key=lambda x: x[1], reverse=True)
-    readable = [labels[k] for k, _ in sorted_items]
-    values = [v for _, v in sorted_items]
-    raw_values = [weights[k] for k, _ in sorted_items]
-    colors = _gradient_colors(values)
-    text_labels = [f"{v:.2f}" for v in values]
-
-    fig = go.Figure(go.Bar(
-        x=values, y=readable, orientation='h',
-        marker=dict(color=colors, line=dict(width=0)),
-        customdata=raw_values,
-        text=text_labels,
-        textposition='outside',
-        textfont=dict(size=11),
-        hovertemplate='<b>%{y}</b><br>Relative weight: %{x:.3f}<br>Raw weight: %{customdata:.4f}<extra></extra>',
-    ))
-    fig.update_layout(
-        xaxis=dict(
-            title="Relative weight (best stat = 1.0)",
-            range=[0, 1.25],
-            showgrid=False,
-            zeroline=False,
-            showline=False,
-            tickfont=dict(size=11),
-        ),
-        yaxis=dict(autorange='reversed', showgrid=False, tickfont=dict(size=12)),
-        margin=dict(l=0, r=50, t=10, b=40),
-        height=60 + 40 * len(weights),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-    )
-    return fig
 
 
 def _rank_color(rank: int) -> tuple:
@@ -636,16 +640,8 @@ if _do_calculate:
     p_dec = _pct_to_decimal(player_vals)
     t_dec = _pct_to_decimal(target_vals)
     _dmg_type_param = "pen" if st.session_state.get("dm_dmg_type") == "Penetration" else "crit"
-    if mode == "PVE":
-        player = PVEPlayerStats(**p_dec)
-        target = PVETargetStats(**t_dec)
-        multiplier = pve_calculate_multiplier(player, target, _dmg_type_param)
-        weights = pve_modifier_weights(player, target, _dmg_type_param)
-    else:
-        player = PVPPlayerStats(**p_dec)
-        target = PVPTargetStats(**t_dec)
-        multiplier = pvp_calculate_multiplier(player, target, _dmg_type_param)
-        weights = pvp_modifier_weights(player, target, _dmg_type_param)
+    multiplier = _calculate(mode, p_dec, t_dec, _dmg_type_param)
+    weights = _weights(mode, p_dec, t_dec, _dmg_type_param)
 
     # Scale PCT fields so weights represent change-per-1-unit-of-user-input.
     weights = {k: (v * 0.01 if k in _PCT_FIELDS else v) for k, v in weights.items()}
@@ -659,8 +655,8 @@ if _do_calculate:
     else:
         weights.pop('crit_dmg_bonus', None)
 
-    _pf = _PVE_PLAYER_FIELDS if mode == "PVE" else _PVP_PLAYER_FIELDS
-    labels_map = {field: label for field, (label, _) in _pf.items()}
+    p_fields, _ = _ALL_FIELDS[mode]
+    labels_map = {field: label for field, (label, _) in p_fields.items()}
     positive_weights = {k: v for k, v in weights.items() if v > 0}
 
     # Persist results so reruns from the reference selectbox don't clear them.
@@ -776,30 +772,18 @@ with col_cmp_p:
 if _sel_builds:
     # Resolve target stats
     if _sel_target == "— Current target —":
-        _t_raw = {
-            f: st.session_state.get(_field_key(f"dm_t_{cmp_mode}", f), default)
-            for f, (_, default) in _cmp_t_fields.items()
-        }
+        _t_raw = _read_from_session(_cmp_t_fields, f"dm_t_{cmp_mode}")
     else:
-        _t_raw = {
-            f: _cmp_target_builds[_sel_target]["stats"].get(f, default)
-            for f, (_, default) in _cmp_t_fields.items()
-        }
+        _t_raw = _read_from_build(_cmp_target_builds[_sel_target]["stats"], _cmp_t_fields)
     _t_dec = _pct_to_decimal(_t_raw)
 
     # Calculate multiplier for each selected build
     _cmp_dmg_param = "pen" if cmp_dmg_type == "Penetration" else "crit"
     _cmp_results = {}
     for _bname in _sel_builds:
-        _p_raw = {
-            f: _cmp_player_builds[_bname]["stats"].get(f, default)
-            for f, (_, default) in _cmp_p_fields.items()
-        }
+        _p_raw = _read_from_build(_cmp_player_builds[_bname]["stats"], _cmp_p_fields)
         _p_dec = _pct_to_decimal(_p_raw)
-        if cmp_mode == "PVE":
-            _cmp_results[_bname] = pve_calculate_multiplier(PVEPlayerStats(**_p_dec), PVETargetStats(**_t_dec), _cmp_dmg_param)
-        else:
-            _cmp_results[_bname] = pvp_calculate_multiplier(PVPPlayerStats(**_p_dec), PVPTargetStats(**_t_dec), _cmp_dmg_param)
+        _cmp_results[_bname] = _calculate(cmp_mode, _p_dec, _t_dec, _cmp_dmg_param)
 
     _sorted = sorted(_cmp_results.items(), key=lambda x: x[1], reverse=True)
     _names  = [k for k, _ in _sorted]
@@ -807,21 +791,10 @@ if _sel_builds:
     _max    = max(_values)
     _colors = _gradient_colors([v / _max for v in _values])
 
-    _cmp_fig = go.Figure(go.Bar(
-        x=_values, y=_names, orientation='h',
-        marker=dict(color=_colors, line=dict(width=0)),
-        text=[f"{v:,.2f}" for v in _values],
-        textposition='outside',
-        textfont=dict(size=11),
-        hovertemplate='<b>%{y}</b><br>Multiplier: %{x:,.2f}<extra></extra>',
-    ))
-    _cmp_fig.update_layout(
-        xaxis=dict(title="Damage Multiplier", showgrid=False, zeroline=False, showline=False),
-        yaxis=dict(autorange='reversed', showgrid=False, tickfont=dict(size=12)),
-        margin=dict(l=0, r=80, t=10, b=40),
-        height=60 + 40 * len(_cmp_results),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+    _cmp_fig = _make_bar_chart(
+        _values, _names, _colors,
+        x_title="Damage Multiplier",
+        hover_tpl='<b>%{y}</b><br>Multiplier: %{x:,.2f}<extra></extra>',
     )
     st.plotly_chart(_cmp_fig, use_container_width=True)
 else:
