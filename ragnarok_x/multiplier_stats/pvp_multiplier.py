@@ -73,7 +73,7 @@ def calculate_multiplier(
     if damage_type == "pen":
         atk_mult = pen_multiplier(player.total_final_pen - target.total_final_def)
     else:
-        atk_mult = player.crit_dmg_bonus - target.crit_dmg_reduc
+        atk_mult = max(player.crit_dmg_bonus - target.crit_dmg_reduc, _FLOOR)
 
     base = (
         player.patk * atk_mult

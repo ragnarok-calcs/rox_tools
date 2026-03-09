@@ -140,7 +140,7 @@ def _get_groups(mode: str, dmg_type: str) -> list:
 _PVE_GROUPS = [
     ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc'],  None),
     ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc'],
-        lambda p, t: p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100),
+        lambda p, t: max(p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100, 0.2)),
     ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc'],
         lambda p, t: max(1 + (p['final_pdmg_bonus'] - t['final_pdmg_reduc']) / 100, 0.2)),
     ('Size',        ['weapon_size_modifier', 'size_enhance'],                       [],
@@ -155,7 +155,7 @@ _PVE_GROUPS = [
 _PVP_GROUPS = [
     ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc'],  None),
     ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc'],
-        lambda p, t: p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100),
+        lambda p, t: max(p['crit_dmg_bonus'] / 100 - t['crit_dmg_reduc'] / 100, 0.2)),
     ('Final P.DMG', ['final_pdmg_bonus'],                                           ['final_pdmg_reduc'],
         lambda p, t: max(1 + (p['final_pdmg_bonus'] - t['final_pdmg_reduc']) / 100, 0.2)),
     ('Size',        ['weapon_size_modifier', 'size_enhance'],                       ['size_reduc'],
@@ -577,10 +577,20 @@ def _stat_input_section():
 
     # Reset expander states when mode or damage type changes.
     _state_key = f"{_mode}_{_dmg_type}"
-    if st.session_state.get("dm_state_key_prev") != _state_key:
+    _prev_key = st.session_state.get("dm_state_key_prev")
+    if _prev_key != _state_key:
+        # Transfer open/closed state between Crit ↔ Penetration expanders
+        _crit_exp = st.session_state.get("dm_exp_Crit", False)
+        _pen_exp = st.session_state.get("dm_exp_Penetration", False)
         for _lbl in ["Base Attack", "Crit", "Penetration", "Final P.DMG",
                      "Size", "Element", "Race", "Final DMG", "PVP DMG"]:
             st.session_state.pop(f"dm_exp_{_lbl}", None)
+        # Only carry over when the damage type changed (not the mode)
+        if _prev_key is not None and _prev_key.split("_")[0] == _mode:
+            if _dmg_type == "Penetration":
+                st.session_state["dm_exp_Penetration"] = _crit_exp
+            else:
+                st.session_state["dm_exp_Crit"] = _pen_exp
         st.session_state["dm_state_key_prev"] = _state_key
 
     _player_vals: dict = {}
