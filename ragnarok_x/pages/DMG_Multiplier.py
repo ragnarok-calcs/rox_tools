@@ -34,12 +34,14 @@ _PVE_PLAYER_FIELDS = {
     'final_dmg_bonus':      ('Final DMG Bonus %',        0),
     'weapon_size_modifier': ('Weapon Size Modifier %',   100),
     'size_enhance':         ('Bonus DMG to Size %',      0),
+    'total_final_pen':      ('Total Final PEN %',        0),
 }
 _PVE_TARGET_FIELDS = {
     'crit_dmg_reduc':   ('Crit DMG Reduction %',     0),
     'pdmg_reduc':       ('P.DMG Reduction',           0),
     'final_pdmg_reduc': ('Final P.DMG Reduction %',   0),
     'final_dmg_reduc':  ('Final DMG Reduction %',     0),
+    'total_final_def':  ('Total Final DEF %',          0),
 }
 _PVP_PLAYER_FIELDS = {
     'patk':                 ('P.ATK',                  1000),
@@ -55,6 +57,7 @@ _PVP_PLAYER_FIELDS = {
     'final_dmg_bonus':      ('Final DMG Bonus %',        0),
     'pvp_final_pdmg_bonus': ('PVP Final P.DMG Bonus %',  0),
     'pvp_pdmg_bonus':       ('PVP P.DMG Bonus',         0),
+    'total_final_pen':      ('Total Final PEN %',        0),
 }
 _PVP_TARGET_FIELDS = {
     'crit_dmg_reduc':       ('Crit DMG Reduction %',        0),
@@ -66,6 +69,7 @@ _PVP_TARGET_FIELDS = {
     'final_dmg_reduc':      ('Final DMG Reduction %',        0),
     'pvp_pdmg_reduc':       ('PVP P.DMG Reduction',          0),
     'pvp_final_pdmg_reduc': ('PVP Final P.DMG Reduction %',  0),
+    'total_final_def':      ('Total Final DEF %',            0),
 }
 
 _ALL_FIELDS = {
@@ -78,9 +82,11 @@ _PCT_FIELDS = {
     'crit_dmg_bonus', 'final_pdmg_bonus', 'weapon_size_modifier', 'size_enhance',
     'bonus_dmg_race', 'elemental_counter', 'element_enhance', 'bonus_dmg_element',
     'final_dmg_bonus', 'pvp_final_pdmg_bonus',
-    # Target reductions
+    'total_final_pen',
+    # Target reductions / pen
     'crit_dmg_reduc', 'final_pdmg_reduc', 'element_resist', 'size_reduc',
     'race_reduc', 'final_dmg_reduc', 'pvp_final_pdmg_reduc',
+    'total_final_def',
 }
 
 # Flat stat fields entered as integers (not percentage, not float).
@@ -94,15 +100,42 @@ _SELECT_FIELDS = {
 
 # Icons for stat group expander headers
 _GROUP_ICONS = {
-    'Base Attack': '⚔️',
-    'Crit':        '💥',
-    'Final P.DMG': '🎯',
-    'Size':        '📏',
-    'Element':     '🌀',
-    'Race':        '👥',
-    'Final DMG':   '🔥',
-    'PVP DMG':     '⚡',
+    'Base Attack':  '⚔️',
+    'Crit':         '💥',
+    'Penetration':  '🔱',
+    'Final P.DMG':  '🎯',
+    'Size':         '📏',
+    'Element':      '🌀',
+    'Race':         '👥',
+    'Final DMG':    '🔥',
+    'PVP DMG':      '⚡',
 }
+
+
+def _pen_effective_fn(p_vals: dict, t_vals: dict) -> float:
+    """Compute the penetration ATK multiplier from raw UI values (integer %)."""
+    pen_diff = (p_vals.get('total_final_pen', 0) - t_vals.get('total_final_def', 0)) / 100.0
+    if pen_diff <= 1.5:
+        return 1.0 + pen_diff
+    return 1.0 + pen_diff * 2.0 - 1.5
+
+
+_PEN_GROUP = (
+    'Penetration',
+    ['total_final_pen'],
+    ['total_final_def'],
+    _pen_effective_fn,
+)
+
+
+def _get_groups(mode: str, dmg_type: str) -> list:
+    """Return the stat input groups for the given mode and damage type."""
+    base = _PVE_GROUPS if mode == "PVE" else _PVP_GROUPS
+    if dmg_type == "Crit":
+        return base
+    # Swap the "Crit" group for the "Penetration" group
+    return [_PEN_GROUP if g[0] == "Crit" else g for g in base]
+
 
 # Grouped layout: list of (header, [player_fields], [target_fields])
 _PVE_GROUPS = [
@@ -518,20 +551,33 @@ _manage_builds_panel()
 # ---------------------------------------------------------------------------
 # Page layout
 # ---------------------------------------------------------------------------
-mode = st.radio("Mode", ["PVE", "PVP"], horizontal=True, key="dm_mode")
+col_mode, col_dmg = st.columns([1, 2])
+with col_mode:
+    mode = st.radio("Mode", ["PVE", "PVP"], horizontal=True, key="dm_mode")
+with col_dmg:
+    dmg_type = st.radio(
+        "Damage Type", ["Crit", "Penetration"], horizontal=True, key="dm_dmg_type",
+        help=(
+            "Crit: damage multiplied by (Crit DMG Bonus − Target Crit DMG Reduc).  "
+            "Penetration: non-crit hits — multiplier = 1 + PEN−DEF (or 1 + 2×(PEN−DEF) − 1.5 if PEN−DEF > 150%)."
+        ),
+    )
 
 @st.fragment
 def _stat_input_section():
-    _mode = st.session_state.get("dm_mode", "PVE")
+    _mode     = st.session_state.get("dm_mode", "PVE")
+    _dmg_type = st.session_state.get("dm_dmg_type", "Crit")
     _player_fields = _PVE_PLAYER_FIELDS if _mode == "PVE" else _PVP_PLAYER_FIELDS
     _target_fields = _PVE_TARGET_FIELDS if _mode == "PVE" else _PVP_TARGET_FIELDS
-    _groups = _PVE_GROUPS if _mode == "PVE" else _PVP_GROUPS
+    _groups = _get_groups(_mode, _dmg_type)
 
-    # Reset expander states when mode changes so they default to closed for the new mode.
-    if st.session_state.get("dm_mode_prev") != _mode:
-        for _grp_label, *_ in _groups:
-            st.session_state.pop(f"dm_exp_{_grp_label}", None)
-        st.session_state["dm_mode_prev"] = _mode
+    # Reset expander states when mode or damage type changes.
+    _state_key = f"{_mode}_{_dmg_type}"
+    if st.session_state.get("dm_state_key_prev") != _state_key:
+        for _lbl in ["Base Attack", "Crit", "Penetration", "Final P.DMG",
+                     "Size", "Element", "Race", "Final DMG", "PVP DMG"]:
+            st.session_state.pop(f"dm_exp_{_lbl}", None)
+        st.session_state["dm_state_key_prev"] = _state_key
 
     _player_vals: dict = {}
     _target_vals: dict = {}
@@ -589,23 +635,29 @@ if _do_calculate:
     target_vals = st.session_state.get("_dm_target_vals", {})
     p_dec = _pct_to_decimal(player_vals)
     t_dec = _pct_to_decimal(target_vals)
+    _dmg_type_param = "pen" if st.session_state.get("dm_dmg_type") == "Penetration" else "crit"
     if mode == "PVE":
         player = PVEPlayerStats(**p_dec)
         target = PVETargetStats(**t_dec)
-        multiplier = pve_calculate_multiplier(player, target)
-        weights = pve_modifier_weights(player, target)
+        multiplier = pve_calculate_multiplier(player, target, _dmg_type_param)
+        weights = pve_modifier_weights(player, target, _dmg_type_param)
     else:
         player = PVPPlayerStats(**p_dec)
         target = PVPTargetStats(**t_dec)
-        multiplier = pvp_calculate_multiplier(player, target)
-        weights = pvp_modifier_weights(player, target)
+        multiplier = pvp_calculate_multiplier(player, target, _dmg_type_param)
+        weights = pvp_modifier_weights(player, target, _dmg_type_param)
 
-    # Sympy derivatives are w.r.t. decimal values; scale PCT fields by 0.01 so
-    # weights represent change-per-1-unit-of-user-input across all stat types.
+    # Scale PCT fields so weights represent change-per-1-unit-of-user-input.
     weights = {k: (v * 0.01 if k in _PCT_FIELDS else v) for k, v in weights.items()}
 
     # Exclude static select-box fields from comparison charts
     weights = {k: v for k, v in weights.items() if k not in _SELECT_FIELDS}
+
+    # Exclude the inactive damage-type stat from the chart
+    if _dmg_type_param == "crit":
+        weights.pop('total_final_pen', None)
+    else:
+        weights.pop('crit_dmg_bonus', None)
 
     _pf = _PVE_PLAYER_FIELDS if mode == "PVE" else _PVP_PLAYER_FIELDS
     labels_map = {field: label for field, (label, _) in _pf.items()}
@@ -685,7 +737,11 @@ st.caption(
     "Select a target, pick one or more player builds, and the chart updates automatically."
 )
 
-cmp_mode = st.radio("Comparison Mode", ["PVE", "PVP"], horizontal=True, key="cmp_mode")
+col_cmp_mode, col_cmp_dmg = st.columns([1, 2])
+with col_cmp_mode:
+    cmp_mode = st.radio("Comparison Mode", ["PVE", "PVP"], horizontal=True, key="cmp_mode")
+with col_cmp_dmg:
+    cmp_dmg_type = st.radio("Damage Type", ["Crit", "Penetration"], horizontal=True, key="cmp_dmg_type")
 
 _cmp_p_fields = _PVE_PLAYER_FIELDS if cmp_mode == "PVE" else _PVP_PLAYER_FIELDS
 _cmp_t_fields = _PVE_TARGET_FIELDS if cmp_mode == "PVE" else _PVP_TARGET_FIELDS
@@ -732,6 +788,7 @@ if _sel_builds:
     _t_dec = _pct_to_decimal(_t_raw)
 
     # Calculate multiplier for each selected build
+    _cmp_dmg_param = "pen" if cmp_dmg_type == "Penetration" else "crit"
     _cmp_results = {}
     for _bname in _sel_builds:
         _p_raw = {
@@ -740,9 +797,9 @@ if _sel_builds:
         }
         _p_dec = _pct_to_decimal(_p_raw)
         if cmp_mode == "PVE":
-            _cmp_results[_bname] = pve_calculate_multiplier(PVEPlayerStats(**_p_dec), PVETargetStats(**_t_dec))
+            _cmp_results[_bname] = pve_calculate_multiplier(PVEPlayerStats(**_p_dec), PVETargetStats(**_t_dec), _cmp_dmg_param)
         else:
-            _cmp_results[_bname] = pvp_calculate_multiplier(PVPPlayerStats(**_p_dec), PVPTargetStats(**_t_dec))
+            _cmp_results[_bname] = pvp_calculate_multiplier(PVPPlayerStats(**_p_dec), PVPTargetStats(**_t_dec), _cmp_dmg_param)
 
     _sorted = sorted(_cmp_results.items(), key=lambda x: x[1], reverse=True)
     _names  = [k for k, _ in _sorted]

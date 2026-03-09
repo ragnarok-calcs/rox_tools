@@ -23,6 +23,7 @@ class PlayerStats:
     final_dmg_bonus: float      # Final DMG Bonus
     pvp_final_pdmg_bonus: float # PVP Final P.DMG Bonus
     pvp_pdmg_bonus: float       # PVP P.DMG Bonus (flat additive, outside all factors)
+    total_final_pen: float = 0.0  # Total Final PEN (penetration mode only)
 
 
 @dataclass
@@ -36,12 +37,13 @@ class TargetStats:
     final_dmg_reduc: float      # Target's Final DMG Reduction
     pvp_pdmg_reduc: float       # Target's PVP P.DMG Reduction
     pvp_final_pdmg_reduc: float # Target's PVP Final P.DMG Reduction
+    total_final_def: float = 0.0  # Target's Total Final DEF (penetration mode only)
 
 
 # ---------------------------------------------------------------------------
 # Core functions
 #
-# Full formula:
+# Crit formula:
 #   (8 × (
 #       (P.ATK × (Crit DMG Bonus - Target Crit DMG Reduc)
 #        + P.DMG Bonus × (1 + P.DMG Bonus%) - Target P.DMG Reduc)
@@ -53,11 +55,32 @@ class TargetStats:
 #   ) ^ 0.6 - Target PVP P.DMG Reduc)
 #   × max(1 + PVP Final P.DMG Bonus - Target PVP Final P.DMG Reduc, 0.2)
 #   + PVP P.DMG Bonus
+#
+# Penetration formula replaces the ATK multiplier:
+#   pen_diff = Total Final PEN - Target Total Final DEF
+#   pen_mult = (1 + pen_diff)           if pen_diff <= 1.5
+#            = (1 + pen_diff×2 - 1.5)   if pen_diff >  1.5
 # ---------------------------------------------------------------------------
-def calculate_multiplier(player: PlayerStats, target: TargetStats) -> float:
-    """Return the overall PVP damage multiplier for the given player and target stats."""
+def _pen_multiplier(pen_diff: float) -> float:
+    if pen_diff <= 1.5:
+        return 1.0 + pen_diff
+    return 1.0 + pen_diff * 2.0 - 1.5
+
+
+def calculate_multiplier(
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+) -> float:
+    """Return the overall PVP damage multiplier for the given player and target stats.
+
+    damage_type: "crit" (default) or "pen" (penetration).
+    """
+    if damage_type == "pen":
+        atk_mult = _pen_multiplier(player.total_final_pen - target.total_final_def)
+    else:
+        atk_mult = player.crit_dmg_bonus - target.crit_dmg_reduc
+
     base = (
-        player.patk * (player.crit_dmg_bonus - target.crit_dmg_reduc)
+        player.patk * atk_mult
         + player.pdmg_bonus * (1 + player.pdmg_bonus_pct)
         - target.pdmg_reduc
     )
@@ -76,7 +99,9 @@ def calculate_multiplier(player: PlayerStats, target: TargetStats) -> float:
     )
 
 
-def modifier_weights(player: PlayerStats, target: TargetStats) -> dict[str, float]:
+def modifier_weights(
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+) -> dict[str, float]:
     """
     Return the marginal value of each player stat via finite differences.
 
@@ -84,13 +109,14 @@ def modifier_weights(player: PlayerStats, target: TargetStats) -> dict[str, floa
     drop to 0 for any stat whose factor is pinned at the 0.2 floor.
     Note: stats inside the ^0.6 term have diminishing returns.
     """
-    base = calculate_multiplier(player, target)
+    base = calculate_multiplier(player, target, damage_type)
     eps = 1e-4
     return {
         field: (
             calculate_multiplier(
                 dataclasses.replace(player, **{field: getattr(player, field) + eps}),
                 target,
+                damage_type,
             ) - base
         ) / eps
         for field in player.__dataclass_fields__
