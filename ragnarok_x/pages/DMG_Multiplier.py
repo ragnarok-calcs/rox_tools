@@ -126,6 +126,12 @@ _PEN_GROUP = (
     _pen_effective_fn,
 )
 
+# Fields exclusive to each damage-type group that swap when toggling Crit ↔ Pen.
+# Streamlit GCs widget keys for non-rendered widgets, so these must be
+# backed up / restored across toggles.
+_CRIT_SWAP_FIELDS = ('crit_dmg_bonus', 'crit_dmg_reduc')
+_PEN_SWAP_FIELDS = ('total_final_pen', 'total_final_def')
+
 
 def _get_groups(mode: str, dmg_type: str) -> list:
     """Return the stat input groups for the given mode and damage type."""
@@ -587,10 +593,26 @@ def _stat_input_section():
             st.session_state.pop(f"dm_exp_{_lbl}", None)
         # Only carry over when the damage type changed (not the mode)
         if _prev_key is not None and _prev_key.split("_")[0] == _mode:
+            # Determine which fields are swapping out / in
             if _dmg_type == "Penetration":
+                _out_fields, _in_fields = _CRIT_SWAP_FIELDS, _PEN_SWAP_FIELDS
                 st.session_state["dm_exp_Penetration"] = _crit_exp
             else:
+                _out_fields, _in_fields = _PEN_SWAP_FIELDS, _CRIT_SWAP_FIELDS
                 st.session_state["dm_exp_Crit"] = _pen_exp
+            # Backup outgoing widget values before Streamlit GCs them
+            for _f in _out_fields:
+                for _pfx in (f"dm_p_{_mode}", f"dm_t_{_mode}"):
+                    _k = _field_key(_pfx, _f)
+                    if _k in st.session_state:
+                        st.session_state[f"_bak_{_k}"] = st.session_state[_k]
+            # Restore incoming widget values from previous backup
+            for _f in _in_fields:
+                for _pfx in (f"dm_p_{_mode}", f"dm_t_{_mode}"):
+                    _k = _field_key(_pfx, _f)
+                    _bak = f"_bak_{_k}"
+                    if _bak in st.session_state:
+                        st.session_state[_k] = st.session_state.pop(_bak)
         st.session_state["dm_state_key_prev"] = _state_key
 
     _player_vals: dict = {}
