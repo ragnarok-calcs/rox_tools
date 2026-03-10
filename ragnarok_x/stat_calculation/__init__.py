@@ -8,7 +8,7 @@ import typing as T
 
 secondary_stats = T.Literal['CRIT', 'ASPD', 'CT Reduction', 'CD Reduction']
 
-def stat_factory(stat: secondary_stats) -> STAT:
+def stat_factory(stat: secondary_stats) -> Stat:
     val_stat = stat.lower().strip()
     if val_stat == 'crit':
         return CRIT()
