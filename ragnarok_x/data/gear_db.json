@@ -1,0 +1,4502 @@
+{
+  "Weapon": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Iron Sword +0 (Medium)": {
+      "exclusive": {},
+      "base": {
+        "patk": 120,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Composite Bow +0 (Medium)": {
+      "exclusive": {},
+      "base": {
+        "patk": 110,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Stiletto +0 (Small)": {
+      "exclusive": {},
+      "base": {
+        "patk": 95,
+        "weapon_size_modifier": 75
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Flamberge +0 (Medium)": {
+      "exclusive": {},
+      "base": {
+        "patk": 185,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Mythic Blade +0 (Medium)": {
+      "exclusive": {
+        "final_pdmg_bonus": 5
+      },
+      "base": {
+        "patk": 310,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Mythic Dagger +0 (Small)": {
+      "exclusive": {
+        "crit_dmg_bonus": 20
+      },
+      "base": {
+        "patk": 265,
+        "weapon_size_modifier": 75
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Mjolnir +0 (Medium)": {
+      "exclusive": {
+        "pdmg_bonus": 200
+      },
+      "base": {
+        "patk": 420,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ]
+    },
+    "Halberd +0 (Large)": {
+      "exclusive": {},
+      "base": {
+        "patk": 240,
+        "weapon_size_modifier": 125
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    },
+    "Claymore +0 (Large)": {
+      "exclusive": {},
+      "base": {
+        "patk": 290,
+        "weapon_size_modifier": 125
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    },
+    "Battle Bow +0 (Medium)": {
+      "exclusive": {
+        "crit_dmg_bonus": 15
+      },
+      "base": {
+        "patk": 200,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    },
+    "Survivor's Rod +0 (Medium)": {
+      "exclusive": {
+        "element_enhance": 8
+      },
+      "base": {
+        "patk": 160,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    },
+    "Brocca +0 (Medium)": {
+      "exclusive": {
+        "bonus_dmg_race": 8
+      },
+      "base": {
+        "patk": 350,
+        "weapon_size_modifier": 100
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    },
+    "Mythic Spear +0 (Large)": {
+      "exclusive": {
+        "final_pdmg_bonus": 6
+      },
+      "base": {
+        "patk": 480,
+        "weapon_size_modifier": 125
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 15
+        },
+        {
+          "patk": 30
+        },
+        {
+          "patk": 50
+        },
+        {
+          "patk": 75
+        },
+        {
+          "patk": 105
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 22
+        },
+        {
+          "patk": 36
+        },
+        {
+          "patk": 52
+        },
+        {
+          "patk": 70
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 115
+        },
+        {
+          "patk": 145
+        },
+        {
+          "patk": 180
+        },
+        {
+          "patk": 220
+        },
+        {
+          "patk": 265
+        },
+        {
+          "patk": 315
+        },
+        {
+          "patk": 370
+        },
+        {
+          "patk": 430
+        },
+        {
+          "patk": 500
+        }
+      ],
+      "two_handed": true
+    }
+  },
+  "Off-Hand": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Buckler": {
+      "exclusive": {},
+      "base": {
+        "patk": 20
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Guard Shield": {
+      "exclusive": {},
+      "base": {
+        "patk": 35
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Mythic Shield": {
+      "exclusive": {
+        "final_pdmg_bonus": 3
+      },
+      "base": {
+        "patk": 60
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Tome of Destruction": {
+      "exclusive": {
+        "pdmg_bonus": 80
+      },
+      "base": {
+        "patk": 45
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Cursed Hand": {
+      "exclusive": {
+        "crit_dmg_bonus": 15
+      },
+      "base": {
+        "patk": 30
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 8
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 35
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    }
+  },
+  "Armor": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Chain Mail": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Full Plate": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Mythic Armor": {
+      "exclusive": {
+        "final_pdmg_bonus": 3
+      },
+      "base": {
+        "patk": 30
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Dragon Scale Armor": {
+      "exclusive": {
+        "bonus_dmg_element": 5
+      },
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Shadow Robe": {
+      "exclusive": {
+        "final_dmg_bonus": 4
+      },
+      "base": {
+        "patk": 40
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    }
+  },
+  "Cloak": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Muffler": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Formal Suit": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Mythic Cloak": {
+      "exclusive": {
+        "bonus_dmg_race": 3
+      },
+      "base": {
+        "patk": 20
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Assassin's Mantle": {
+      "exclusive": {
+        "crit_dmg_bonus": 10
+      },
+      "base": {
+        "patk": 25
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Hero's Cape": {
+      "exclusive": {
+        "final_pdmg_bonus": 4
+      },
+      "base": {
+        "patk": 20
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    }
+  },
+  "Shoes": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Boots": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Tidal Shoes": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Mythic Shoes": {
+      "exclusive": {
+        "size_enhance": 3
+      },
+      "base": {
+        "patk": 20
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Valkyrie Shoes": {
+      "exclusive": {
+        "final_dmg_bonus": 3
+      },
+      "base": {
+        "patk": 15
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    },
+    "Sleipnir": {
+      "exclusive": {
+        "final_pdmg_bonus": 3
+      },
+      "base": {
+        "patk": 30
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 10
+        },
+        {
+          "patk": 16
+        },
+        {
+          "patk": 23
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 3
+        },
+        {
+          "patk": 7
+        },
+        {
+          "patk": 12
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 33
+        },
+        {
+          "patk": 42
+        },
+        {
+          "patk": 53
+        },
+        {
+          "patk": 66
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 96
+        },
+        {
+          "patk": 114
+        },
+        {
+          "patk": 134
+        },
+        {
+          "patk": 156
+        },
+        {
+          "patk": 180
+        }
+      ]
+    }
+  },
+  "Accessory 1": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Ring of Muscle": {
+      "exclusive": {},
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Clip of Mustle": {
+      "exclusive": {
+        "crit_dmg_bonus": 10
+      },
+      "base": {
+        "patk": 40
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Mythic Ring": {
+      "exclusive": {
+        "crit_dmg_bonus": 15
+      },
+      "base": {
+        "patk": 80
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Necklace of Warrior": {
+      "exclusive": {
+        "pdmg_bonus": 120
+      },
+      "base": {
+        "patk": 30
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Gold Ring": {
+      "exclusive": {
+        "crit_dmg_bonus": 25
+      },
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Pendant of Storm": {
+      "exclusive": {
+        "element_enhance": 5
+      },
+      "base": {
+        "patk": 40
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    }
+  },
+  "Accessory 2": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Ring of Muscle": {
+      "exclusive": {},
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Clip of Mustle": {
+      "exclusive": {
+        "crit_dmg_bonus": 10
+      },
+      "base": {
+        "patk": 40
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Mythic Ring": {
+      "exclusive": {
+        "crit_dmg_bonus": 15
+      },
+      "base": {
+        "patk": 80
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Necklace of Warrior": {
+      "exclusive": {
+        "pdmg_bonus": 120
+      },
+      "base": {
+        "patk": 30
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Gold Ring": {
+      "exclusive": {
+        "crit_dmg_bonus": 25
+      },
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    },
+    "Earring of Nature": {
+      "exclusive": {
+        "bonus_dmg_element": 8
+      },
+      "base": {
+        "patk": 35
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 10
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 32
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 2
+        },
+        {
+          "patk": 5
+        },
+        {
+          "patk": 9
+        },
+        {
+          "patk": 14
+        },
+        {
+          "patk": 20
+        },
+        {
+          "patk": 27
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 44
+        },
+        {
+          "patk": 55
+        },
+        {
+          "patk": 67
+        },
+        {
+          "patk": 80
+        },
+        {
+          "patk": 95
+        },
+        {
+          "patk": 111
+        },
+        {
+          "patk": 129
+        },
+        {
+          "patk": 150
+        }
+      ]
+    }
+  },
+  "Talisman 1": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Warrior Talisman": {
+      "exclusive": {
+        "final_pdmg_bonus": 6
+      },
+      "base": {
+        "patk": 120
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Slayer Talisman": {
+      "exclusive": {
+        "crit_dmg_bonus": 30,
+        "final_pdmg_bonus": 5
+      },
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Berserk Talisman": {
+      "exclusive": {
+        "pdmg_bonus": 200,
+        "final_pdmg_bonus": 4
+      },
+      "base": {
+        "patk": 90
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Elemental Talisman": {
+      "exclusive": {
+        "element_enhance": 10,
+        "bonus_dmg_element": 8
+      },
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Predator Talisman": {
+      "exclusive": {
+        "bonus_dmg_race": 10,
+        "size_enhance": 8
+      },
+      "base": {
+        "patk": 60
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    }
+  },
+  "Talisman 2": {
+    "None": {
+      "exclusive": {},
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Warrior Talisman": {
+      "exclusive": {
+        "final_pdmg_bonus": 6
+      },
+      "base": {
+        "patk": 120
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Slayer Talisman": {
+      "exclusive": {
+        "crit_dmg_bonus": 30,
+        "final_pdmg_bonus": 5
+      },
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Hunter Talisman": {
+      "exclusive": {
+        "final_dmg_bonus": 8
+      },
+      "base": {
+        "patk": 80
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Duelist Talisman": {
+      "exclusive": {
+        "pvp_final_pdmg_bonus": 12,
+        "pvp_pdmg_bonus": 150
+      },
+      "base": {},
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    },
+    "Titan Talisman": {
+      "exclusive": {
+        "size_enhance": 12,
+        "bonus_dmg_race": 8
+      },
+      "base": {
+        "patk": 50
+      },
+      "upgrade": [
+        {},
+        {
+          "patk": 12
+        },
+        {
+          "patk": 25
+        },
+        {
+          "patk": 40
+        },
+        {
+          "patk": 58
+        }
+      ],
+      "refine": [
+        {},
+        {
+          "patk": 5
+        },
+        {
+          "patk": 11
+        },
+        {
+          "patk": 18
+        },
+        {
+          "patk": 26
+        },
+        {
+          "patk": 35
+        },
+        {
+          "patk": 45
+        },
+        {
+          "patk": 57
+        },
+        {
+          "patk": 72
+        },
+        {
+          "patk": 90
+        },
+        {
+          "patk": 110
+        },
+        {
+          "patk": 133
+        },
+        {
+          "patk": 158
+        },
+        {
+          "patk": 185
+        },
+        {
+          "patk": 215
+        },
+        {
+          "patk": 250
+        }
+      ]
+    }
+  }
+}

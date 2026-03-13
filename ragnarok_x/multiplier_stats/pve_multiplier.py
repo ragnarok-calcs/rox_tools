@@ -59,11 +59,13 @@ def pen_multiplier(pen_diff: float) -> float:
 
 
 def calculate_multiplier(
-    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit",
+    attack_mult: int = 8,
 ) -> float:
     """Return the overall PVE damage multiplier for the given player and target stats.
 
     damage_type: "crit" (default) or "pen" (penetration).
+    attack_mult: 8 for normal attacks, 16 for skill attacks.
     """
     if damage_type == "pen":
         atk_mult = pen_multiplier(player.total_final_pen - target.total_final_def)
@@ -76,7 +78,8 @@ def calculate_multiplier(
         - target.pdmg_reduc
     )
     return (
-        base
+        attack_mult
+        * base
         * max(1 + player.final_pdmg_bonus - target.final_pdmg_reduc, _FLOOR)
         * max(player.elemental_counter + player.element_enhance, _FLOOR)
         * (1 + player.bonus_dmg_element)
@@ -87,7 +90,8 @@ def calculate_multiplier(
 
 
 def modifier_weights(
-    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit",
+    attack_mult: int = 8,
 ) -> dict[str, float]:
     """
     Return the marginal value of each player stat via finite differences.
@@ -95,7 +99,7 @@ def modifier_weights(
     Uses calculate_multiplier (with floored factors) so weights automatically
     drop to 0 for any stat whose factor is pinned at the 0.2 floor.
     """
-    base = calculate_multiplier(player, target, damage_type)
+    base = calculate_multiplier(player, target, damage_type, attack_mult)
     eps = 1e-4
     return {
         field: (
@@ -103,6 +107,7 @@ def modifier_weights(
                 dataclasses.replace(player, **{field: getattr(player, field) + eps}),
                 target,
                 damage_type,
+                attack_mult,
             ) - base
         ) / eps
         for field in player.__dataclass_fields__

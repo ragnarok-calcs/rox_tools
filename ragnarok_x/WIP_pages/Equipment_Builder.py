@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import streamlit as st
 from data.gear_db import GEAR_DB
+from data.cards_db import get_flat_cards_db
 
 st.set_page_config(page_title="Equipment Builder", layout="wide")
 st.title("Equipment Builder")
@@ -66,26 +67,8 @@ def _blank() -> dict:
 SLOTS = ["Weapon", "Off-Hand", "Armor", "Cloak", "Shoes",
          "Accessory 1", "Accessory 2", "Talisman 1", "Talisman 2"]
 
-# Card database: {card_name: {stat_field: value}}
-CARDS_DB: dict[str, dict] = {
-    "None":                   {},
-    "Metaller Card":          {"patk": 120},
-    "Orc Warrior Card":       {"patk": 80,  "pdmg_bonus": 50},
-    "Drake Card":             {"patk": 60,  "size_enhance": 15},
-    "Mummy Card":             {"crit_dmg_bonus": 20},
-    "Phreeoni Card":          {"crit_dmg_bonus": 15, "patk": 40},
-    "Minorous Card":          {"bonus_dmg_race": 20},
-    "Racial Boss Card":       {"bonus_dmg_race": 25, "patk": 30},
-    "Hydra Card":             {"bonus_dmg_race": 15, "final_pdmg_bonus": 3},
-    "Willow Card":            {"size_enhance": 10},
-    "Baphomet Jr Card":       {"size_enhance": 20},
-    "Verit Card":             {"element_enhance": 10},
-    "Vadon Card":             {"bonus_dmg_element": 8},
-    "Evil Snake Lord Card":   {"final_dmg_bonus": 8},
-    "Gloom Under Night Card": {"final_pdmg_bonus": 8},
-    "Stormy Knight Card":     {"pvp_final_pdmg_bonus": 10},
-    "Maya Purple Card":       {"pvp_pdmg_bonus": 200},
-}
+# Card database: {card_name: {stat_field: value}}  (from shared module)
+CARDS_DB = get_flat_cards_db()
 
 ENCHANT_POOLS: dict[str, list[str]] = {
     "Weapon / Off-Hand": [

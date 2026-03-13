@@ -78,6 +78,15 @@ _ALL_FIELDS = {
     'PVP': (_PVP_PLAYER_FIELDS, _PVP_TARGET_FIELDS),
 }
 
+# Union of all player/target fields across both modes (used for build storage).
+_ALL_PLAYER_FIELDS: dict = {}
+for _f, _v in {**_PVE_PLAYER_FIELDS, **_PVP_PLAYER_FIELDS}.items():
+    _ALL_PLAYER_FIELDS.setdefault(_f, _v)
+
+_ALL_TARGET_FIELDS: dict = {}
+for _f, _v in {**_PVE_TARGET_FIELDS, **_PVP_TARGET_FIELDS}.items():
+    _ALL_TARGET_FIELDS.setdefault(_f, _v)
+
 # Fields whose UI values are integer percentages (e.g. 20 → 0.20 in the formula).
 _PCT_FIELDS = {
     'crit_dmg_bonus', 'final_pdmg_bonus', 'weapon_size_modifier', 'size_enhance',
@@ -128,11 +137,7 @@ _PEN_GROUP = (
 
 
 def _get_groups(mode: str) -> list:
-    """Return stat input groups with both Crit and Pen always present.
-
-    Both groups are always rendered so Streamlit preserves their widget
-    state across damage-type toggles.
-    """
+    """Return stat input groups with both Crit and Pen always present."""
     base = _PVE_GROUPS if mode == "PVE" else _PVP_GROUPS
     result = []
     for g in base:
@@ -144,7 +149,7 @@ def _get_groups(mode: str) -> list:
     return result
 
 
-# Grouped layout: list of (header, [player_fields], [target_fields])
+# Grouped layout: list of (header, [player_fields], [target_fields], effective_fn)
 _PVE_GROUPS = [
     ('Base Attack', ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],                      ['pdmg_reduc'],  None),
     ('Crit',        ['crit_dmg_bonus'],                                             ['crit_dmg_reduc'],
@@ -200,6 +205,92 @@ def _render_input(field: str, label: str, default, key: str, on_change=None):
         return st.number_input(label, value=default, min_value=0.0, key=key, **kwargs)
 
 
+def _pct_to_decimal(vals: dict) -> dict:
+    """Convert integer-percentage fields to their decimal equivalents for formula use."""
+    return {k: v / 100.0 if k in _PCT_FIELDS else v for k, v in vals.items()}
+
+
+def _calculate(mode: str, p_dec: dict, t_dec: dict, dmg_type: str,
+               attack_mult: int = 8) -> float:
+    """Dispatch to the correct PVE/PVP multiplier calculation."""
+    if mode == "PVE":
+        return pve_calculate_multiplier(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type, attack_mult)
+    return pvp_calculate_multiplier(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type, attack_mult)
+
+
+def _weights(mode: str, p_dec: dict, t_dec: dict, dmg_type: str,
+             attack_mult: int = 8) -> dict[str, float]:
+    """Dispatch to the correct PVE/PVP modifier weights calculation."""
+    if mode == "PVE":
+        return pve_modifier_weights(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type, attack_mult)
+    return pvp_modifier_weights(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type, attack_mult)
+
+
+# ---------------------------------------------------------------------------
+# Build apply / read helpers
+# ---------------------------------------------------------------------------
+def _apply_player_build(build: dict):
+    """Apply a player build's stats to widget keys for BOTH PVE and PVP modes."""
+    stats = build.get("stats", {})
+    for m in ("PVE", "PVP"):
+        fields = _PVE_PLAYER_FIELDS if m == "PVE" else _PVP_PLAYER_FIELDS
+        for field, (_, default) in fields.items():
+            value = stats.get(field, default)
+            v = int(value) if field in _SELECT_FIELDS else float(value)
+            st.session_state[_field_key(f"dm_p_{m}", field)] = v
+
+
+def _apply_target_build(build: dict):
+    """Apply a target build's stats to widget keys for BOTH PVE and PVP modes."""
+    stats = build.get("stats", {})
+    for m in ("PVE", "PVP"):
+        fields = _PVE_TARGET_FIELDS if m == "PVE" else _PVP_TARGET_FIELDS
+        for field, (_, default) in fields.items():
+            value = stats.get(field, default)
+            st.session_state[_field_key(f"dm_t_{m}", field)] = float(value)
+
+
+def _apply_player_defaults():
+    """Reset all player widget keys to their defaults across both modes."""
+    for m in ("PVE", "PVP"):
+        fields = _PVE_PLAYER_FIELDS if m == "PVE" else _PVP_PLAYER_FIELDS
+        for f, (_, default) in fields.items():
+            v = int(default) if f in _SELECT_FIELDS else float(default)
+            st.session_state[_field_key(f"dm_p_{m}", f)] = v
+
+
+def _apply_target_defaults():
+    """Reset all target widget keys to their defaults across both modes."""
+    for m in ("PVE", "PVP"):
+        fields = _PVE_TARGET_FIELDS if m == "PVE" else _PVP_TARGET_FIELDS
+        for f, (_, default) in fields.items():
+            st.session_state[_field_key(f"dm_t_{m}", f)] = float(default)
+
+
+def _read_all_player_stats() -> dict:
+    """Read all player stats from widget keys; current mode takes precedence for shared fields."""
+    result = {}
+    current_mode = st.session_state.get("dm_mode", "PVE")
+    other_mode   = "PVP" if current_mode == "PVE" else "PVE"
+    for m in (other_mode, current_mode):   # current mode overwrites last
+        fields = _PVE_PLAYER_FIELDS if m == "PVE" else _PVP_PLAYER_FIELDS
+        for f, (_, default) in fields.items():
+            result[f] = st.session_state.get(_field_key(f"dm_p_{m}", f), default)
+    return result
+
+
+def _read_all_target_stats() -> dict:
+    """Read all target stats from widget keys; current mode takes precedence for shared fields."""
+    result = {}
+    current_mode = st.session_state.get("dm_mode", "PVE")
+    other_mode   = "PVP" if current_mode == "PVE" else "PVE"
+    for m in (other_mode, current_mode):
+        fields = _PVE_TARGET_FIELDS if m == "PVE" else _PVP_TARGET_FIELDS
+        for f, (_, default) in fields.items():
+            result[f] = st.session_state.get(_field_key(f"dm_t_{m}", f), default)
+    return result
+
+
 def _read_from_session(fields: dict, key_prefix: str) -> dict:
     return {
         field: st.session_state.get(_field_key(key_prefix, field), default)
@@ -207,53 +298,17 @@ def _read_from_session(fields: dict, key_prefix: str) -> dict:
     }
 
 
-def _apply_player_build(build: dict):
-    mode = build["mode"]
-    p_fields, _ = _ALL_FIELDS[mode]
-    st.session_state["dm_mode"] = mode
-    for field, value in build.get("stats", {}).items():
-        if field in p_fields:
-            v = int(value) if field in _SELECT_FIELDS else float(value)
-            st.session_state[_field_key(f"dm_p_{mode}", field)] = v
-
-
-def _apply_target_build(build: dict):
-    mode = build["mode"]
-    _, t_fields = _ALL_FIELDS[mode]
-    for field, value in build.get("stats", {}).items():
-        if field in t_fields:
-            st.session_state[_field_key(f"dm_t_{mode}", field)] = float(value)
-
-
-def _pct_to_decimal(vals: dict) -> dict:
-    """Convert integer-percentage fields to their decimal equivalents for formula use."""
-    return {k: v / 100.0 if k in _PCT_FIELDS else v for k, v in vals.items()}
-
-
 def _read_from_build(build_stats: dict, fields: dict) -> dict:
-    """Read stat values from a saved build dict, falling back to field defaults."""
     return {f: build_stats.get(f, default) for f, (_, default) in fields.items()}
 
 
-def _calculate(mode: str, p_dec: dict, t_dec: dict, dmg_type: str) -> float:
-    """Dispatch to the correct PVE/PVP multiplier calculation."""
-    if mode == "PVE":
-        return pve_calculate_multiplier(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type)
-    return pvp_calculate_multiplier(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type)
-
-
-def _weights(mode: str, p_dec: dict, t_dec: dict, dmg_type: str) -> dict[str, float]:
-    """Dispatch to the correct PVE/PVP modifier weights calculation."""
-    if mode == "PVE":
-        return pve_modifier_weights(PVEPlayerStats(**p_dec), PVETargetStats(**t_dec), dmg_type)
-    return pvp_modifier_weights(PVPPlayerStats(**p_dec), PVPTargetStats(**t_dec), dmg_type)
-
-
+# ---------------------------------------------------------------------------
+# Chart / display helpers
+# ---------------------------------------------------------------------------
 def _make_bar_chart(
     values: list, labels: list, colors: list,
     x_title: str = "", hover_tpl: str = "", right_margin: int = 80,
 ) -> go.Figure:
-    """Create a horizontal bar chart with shared layout conventions."""
     fig = go.Figure(go.Bar(
         x=values, y=labels, orientation='h',
         marker=dict(color=colors, line=dict(width=0)),
@@ -273,19 +328,11 @@ def _make_bar_chart(
     return fig
 
 
-def _normalize_weights(weights: dict[str, float]) -> dict[str, float]:
-    max_w = max(abs(v) for v in weights.values())
-    if max_w == 0:
-        return {k: 0.0 for k in weights}
-    return {k: v / max_w for k, v in weights.items()}
-
-
 def _gradient_colors(values: list) -> list:
-    """Interpolate colors gold → green → steel-blue based on normalized value."""
     anchors = [
-        (1.0, (255, 215,   0)),  # gold
-        (0.5, ( 46, 204, 113)),  # green
-        (0.0, ( 93, 173, 226)),  # steel blue
+        (1.0, (255, 215,   0)),
+        (0.5, ( 46, 204, 113)),
+        (0.0, ( 93, 173, 226)),
     ]
     colors = []
     for v in values:
@@ -306,24 +353,21 @@ def _gradient_colors(values: list) -> list:
 
 
 def _rank_color(rank: int) -> tuple:
-    """Return (bg_color, text_color) for a rank badge."""
     if rank == 0:
-        return ('#FFD700', '#1a1a1a')   # gold
+        return ('#FFD700', '#1a1a1a')
     elif rank <= 2:
-        return ('#2ecc71', '#ffffff')   # green
+        return ('#2ecc71', '#ffffff')
     else:
-        return ('#5dade2', '#ffffff')   # steel blue
+        return ('#5dade2', '#ffffff')
 
 
 def _render_combined(weights: dict[str, float], labels: dict[str, str], reference: str):
-    """Priority bars normalized to the selected reference, with equivalence column."""
     ref_w = weights[reference]
     max_w = max(weights.values())
     sorted_items = sorted(
         [(k, v) for k, v in weights.items() if v > 0],
         key=lambda x: x[1], reverse=True,
     )
-
     ref_label = labels[reference]
     header_html = f"""
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;
@@ -336,7 +380,6 @@ def _render_combined(weights: dict[str, float], labels: dict[str, str], referenc
         <div style="flex:1; text-align:right;">Per 1 {ref_label}</div>
     </div>
     """
-
     rows_html = ""
     for rank, (field, w) in enumerate(sorted_items):
         label = labels[field]
@@ -348,7 +391,6 @@ def _render_combined(weights: dict[str, float], labels: dict[str, str], referenc
         name_style = "font-weight:700;" if is_ref else ""
         ref_star = " ★" if is_ref else ""
         equiv_str = "1.00" if is_ref else f"{equiv:.2f}"
-
         rows_html += f"""
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
             <div style="background:{bg_color}; color:{txt_color}; border-radius:50%;
@@ -369,7 +411,6 @@ def _render_combined(weights: dict[str, float], labels: dict[str, str], referenc
             </div>
         </div>
         """
-
     st.html(header_html + rows_html)
 
 
@@ -378,18 +419,13 @@ def _group_summary(
     player_fields: dict, target_fields: dict, mode: str,
     effective_fn=None,
 ) -> str:
-    """Build a compact summary string for an expander header from current session state."""
     p_prefix = f"dm_p_{mode}"
     t_prefix = f"dm_t_{mode}"
-
     p_vals = {f: st.session_state.get(_field_key(p_prefix, f), player_fields[f][1]) for f in p_keys}
     t_vals = {f: st.session_state.get(_field_key(t_prefix, f), target_fields[f][1]) for f in t_keys}
-
     if effective_fn is not None:
         effective = effective_fn(p_vals, t_vals)
         return f"Effective: {effective:.2f}×"
-
-    # Fallback for groups without a defined effective multiplier (e.g. Base Attack)
     all_pct = all(f in _PCT_FIELDS or f in _SELECT_FIELDS for f in p_keys + t_keys)
     suf = "%" if all_pct else ""
     p_total = sum(p_vals.values())
@@ -401,169 +437,167 @@ def _group_summary(
     return f"Player: {p_total:g}{suf}  ·  Target: {t_total:g}{suf}  →  Net: {sign}{net:g}{suf}"
 
 
-def _build_panel(store_key: str, apply_fn, label_prefix: str, mode: str, fields: dict):
-    """Render select/load/delete/save controls for one build category (player or target)."""
-    builds: dict = st.session_state[store_key]
-    compatible = {k: v for k, v in builds.items() if v.get("mode") == mode}
-    has_builds = bool(compatible)
-    names = list(compatible.keys()) if has_builds else [f"No {mode} builds saved"]
-
-    pending_key = f"{label_prefix}_pending_select"
-    last_applied_key = f"{label_prefix}_last_applied"
-
-    # Apply any pending selection written by the save handler in the previous run.
-    # Must happen before the selectbox renders to avoid the post-instantiation write error.
-    if pending_key in st.session_state and st.session_state[pending_key] in names:
-        st.session_state[f"{label_prefix}_select"] = st.session_state.pop(pending_key)
-
-    # --- Select & delete (always rendered for consistent height) ---
-    col_sel, col_del = st.columns([5, 1])
-    with col_sel:
-        selected = st.selectbox(
-            "Build", names, index=0, label_visibility="collapsed",
-            key=f"{label_prefix}_select", disabled=not has_builds,
-        )
-    with col_del:
-        if st.button("🗑️", use_container_width=True, key=f"{label_prefix}_del",
-                     type="secondary", help="Delete build", disabled=not has_builds):
-            del st.session_state[store_key][selected]
-            st.rerun(scope="fragment")
-
-    # Auto-apply when the selection changes (detected by comparing to last applied).
-    # Runs in the fragment body rather than on_change so st.rerun(scope="app") reliably
-    # triggers a full rerun that updates widgets outside the fragment.
-    last_applied = st.session_state.get(last_applied_key)
-    if has_builds and selected in compatible and selected != last_applied:
-        apply_fn(compatible[selected])
-        st.session_state[last_applied_key] = selected
-        st.session_state[f"{label_prefix}_name"] = selected
-        st.rerun(scope="app")
-
-    # --- Save current as new build ---
-    col_name, col_save = st.columns([3, 1])
-    with col_name:
-        new_name = st.text_input(
-            "Name", placeholder=f"e.g. My {mode} build",
-            label_visibility="collapsed", key=f"{label_prefix}_name"
-        )
-    with col_save:
-        if st.button("💾", use_container_width=True, key=f"{label_prefix}_save", help="Save build"):
-            name = new_name.strip()
-            if not name:
-                st.toast("Enter a build name.", icon="❌")
-            else:
-                overwrite = name in builds
-                builds[name] = {
-                    "mode": mode,
-                    "stats": _read_from_session(fields, label_prefix),
-                }
-                # Write to a pending key — cannot write directly to the selectbox key
-                # after it has already been instantiated in this run.
-                st.session_state[pending_key] = name
-                # Mark as last applied so saving doesn't trigger an auto-apply on next run.
-                st.session_state[last_applied_key] = name
-                st.toast(f"{'Updated' if overwrite else 'Saved'} '{name}'", icon="✅")
-                st.rerun(scope="fragment")
-
-
 # ---------------------------------------------------------------------------
-# Build management — above mode radio + inputs so session state is set first.
+# Session state init
 # ---------------------------------------------------------------------------
 if "player_builds" not in st.session_state:
     st.session_state["player_builds"] = {}
 if "target_builds" not in st.session_state:
     st.session_state["target_builds"] = {}
 
-@st.fragment
-def _manage_builds_panel():
-    # Peek at mode from session state (radio not yet rendered in main script)
-    mode_now = st.session_state.get("dm_mode", "PVE")
+# ---------------------------------------------------------------------------
+# Sidebar — Build Manager
+# ---------------------------------------------------------------------------
+def _sidebar_save_row(side: str, label: str):
+    """Render a name input + save button for player ('p') or target ('t') builds."""
+    col_name, col_save = st.columns([3, 1])
+    with col_name:
+        new_name = st.text_input(f"{label} build name", placeholder="Build name",
+                                 key=f"dm_sb_{side}_name", label_visibility="collapsed")
+    with col_save:
+        if st.button("💾", key=f"dm_sb_{side}_save", help=f"Save current {label} stats",
+                     use_container_width=True):
+            name = new_name.strip()
+            if not name:
+                st.toast("Enter a name.", icon="❌")
+            elif name == "Default":
+                st.toast('"Default" is reserved.', icon="❌")
+            else:
+                store_key = "player_builds" if side == "p" else "target_builds"
+                overwrite = name in st.session_state[store_key]
+                stats = _read_all_player_stats() if side == "p" else _read_all_target_stats()
+                st.session_state[store_key][name] = {"stats": stats}
+                st.session_state[f"dm_active_{side}_build"] = name
+                st.session_state["_sb_file_loaded"] = True
+                st.toast(f"{'Updated' if overwrite else 'Saved'} '{name}'", icon="✅")
+                st.rerun()
 
-    with st.expander("📁 Manage Builds"):
 
-        # --- Upload ---
-        uploaded = st.file_uploader(
-            "Load builds from JSON", type=["json"], key="dm_uploader"
+with st.sidebar:
+    st.header("Builds")
+
+    if not st.session_state.get("_sb_file_loaded"):
+        # ── Upload state ──────────────────────────────────────────────────
+        uploaded_files = st.file_uploader(
+            "Load builds from JSON", type=["json"],
+            key="dm_uploader", accept_multiple_files=True,
         )
-        if uploaded is not None:
-            file_id = f"{uploaded.name}_{uploaded.size}"
-            if st.session_state.get("_last_loaded") != file_id:
+        if uploaded_files:
+            last_name = ""
+            for uploaded in uploaded_files:
                 try:
                     data = json.load(uploaded)
                     n_player = n_target = 0
-
                     if "player_builds" in data or "target_builds" in data:
-                        # Current format
                         for name, b in data.get("player_builds", {}).items():
-                            st.session_state["player_builds"][name] = b
+                            st.session_state["player_builds"][name] = {"stats": b.get("stats", b)}
                             n_player += 1
                         for name, b in data.get("target_builds", {}).items():
-                            st.session_state["target_builds"][name] = b
+                            st.session_state["target_builds"][name] = {"stats": b.get("stats", b)}
                             n_target += 1
-
                     elif "builds" in data:
-                        # Legacy combined format — split into player + target
                         for name, b in data["builds"].items():
-                            bmode = b.get("mode", "PVE")
-                            p_fields, t_fields = _ALL_FIELDS[bmode]
                             if "player" in b:
                                 st.session_state["player_builds"][name] = {
-                                    "mode": bmode,
-                                    "stats": {k: v for k, v in b["player"].items() if k in p_fields},
+                                    "stats": {k: v for k, v in b["player"].items()
+                                              if k in _ALL_PLAYER_FIELDS},
                                 }
                                 n_player += 1
                             if "target" in b:
                                 st.session_state["target_builds"][name] = {
-                                    "mode": bmode,
-                                    "stats": {k: v for k, v in b["target"].items() if k in t_fields},
+                                    "stats": {k: v for k, v in b["target"].items()
+                                              if k in _ALL_TARGET_FIELDS},
                                 }
                                 n_target += 1
                     else:
-                        st.toast("Unrecognised file format.", icon="❌")
-
-                    if n_player or n_target:
-                        st.session_state["_last_loaded"] = file_id
-                        st.toast(f"Loaded {n_player} player build(s) and {n_target} target build(s).", icon="✅")
-
+                        st.toast(f"{uploaded.name}: unrecognised format.", icon="❌")
+                        continue
+                    last_name = uploaded.name
+                    st.toast(f"{uploaded.name}: loaded {n_player}P / {n_target}T.", icon="✅")
                 except Exception as e:
-                    st.toast(f"Failed to load file: {e}", icon="❌")
+                    st.toast(f"{uploaded.name}: {e}", icon="❌")
+            if last_name:
+                st.session_state["_sb_file_loaded"] = True
+                st.session_state["_sb_loaded_filename"] = last_name
+                st.rerun()
+
+    else:
+        # ── Loaded state ──────────────────────────────────────────────────
+        loaded_name = st.session_state.get("_sb_loaded_filename", "builds")
+        st.caption(f"📄 {loaded_name}")
+
+        total = (len(st.session_state["player_builds"])
+                 + len(st.session_state["target_builds"]))
+        if total:
+            dl_data = json.dumps({
+                "player_builds": st.session_state["player_builds"],
+                "target_builds": st.session_state["target_builds"],
+            }, indent=2)
+            st.download_button(
+                f"⬇ Export builds ({len(st.session_state['player_builds'])}P"
+                f" / {len(st.session_state['target_builds'])}T)",
+                data=dl_data, file_name="rag_builds.json",
+                mime="application/json", use_container_width=True, key="dm_download",
+            )
 
         st.divider()
 
-        col_p, col_t = st.columns(2)
-
-        with col_p:
-            st.markdown("**Player Builds**")
-            _p_fields = _PVE_PLAYER_FIELDS if mode_now == "PVE" else _PVP_PLAYER_FIELDS
-            _build_panel("player_builds", _apply_player_build, f"dm_p_{mode_now}", mode_now, _p_fields)
-
-        with col_t:
-            st.markdown("**Target Builds**")
-            _t_fields = _PVE_TARGET_FIELDS if mode_now == "PVE" else _PVP_TARGET_FIELDS
-            _build_panel("target_builds", _apply_target_build, f"dm_t_{mode_now}", mode_now, _t_fields)
+        # ── Player Builds ─────────────────────────────────────────────────
+        st.subheader("Player Builds")
+        _sidebar_save_row("p", "Player")
+        active_p = st.session_state.get("dm_active_p_build")
+        for bname, build in list(st.session_state["player_builds"].items()):
+            is_active = bname == active_p
+            col_n, col_apply, col_del = st.columns([4, 1, 1])
+            with col_n:
+                if is_active:
+                    st.markdown(f"**▸ {bname}**")
+                else:
+                    st.markdown(bname)
+            with col_apply:
+                if st.button("▶", key=f"apply_p_{bname}", help=f"Apply {bname}",
+                             use_container_width=True):
+                    _apply_player_build(build)
+                    st.session_state["dm_active_p_build"] = bname
+                    st.rerun()
+            with col_del:
+                if st.button("🗑️", key=f"del_p_{bname}", use_container_width=True):
+                    del st.session_state["player_builds"][bname]
+                    if active_p == bname:
+                        st.session_state.pop("dm_active_p_build", None)
+                    st.rerun()
 
         st.divider()
 
-    # --- Download ---
-    total = len(st.session_state["player_builds"]) + len(st.session_state["target_builds"])
-    if total:
-        dl_data = json.dumps({
-            "player_builds": st.session_state["player_builds"],
-            "target_builds": st.session_state["target_builds"],
-        }, indent=2)
-        st.download_button(
-            f"Download builds JSON ({len(st.session_state['player_builds'])}P / "
-            f"{len(st.session_state['target_builds'])}T)",
-            data=dl_data, file_name="rag_builds.json",
-            mime="application/json", use_container_width=True, key="dm_download",
-        )
-
-_manage_builds_panel()
+        # ── Target Builds ─────────────────────────────────────────────────
+        st.subheader("Target Builds")
+        _sidebar_save_row("t", "Target")
+        active_t = st.session_state.get("dm_active_t_build")
+        for bname, build in list(st.session_state["target_builds"].items()):
+            is_active = bname == active_t
+            col_n, col_apply, col_del = st.columns([4, 1, 1])
+            with col_n:
+                if is_active:
+                    st.markdown(f"**▸ {bname}**")
+                else:
+                    st.markdown(bname)
+            with col_apply:
+                if st.button("▶", key=f"apply_t_{bname}", help=f"Apply {bname}",
+                             use_container_width=True):
+                    _apply_target_build(build)
+                    st.session_state["dm_active_t_build"] = bname
+                    st.rerun()
+            with col_del:
+                if st.button("🗑️", key=f"del_t_{bname}", use_container_width=True):
+                    del st.session_state["target_builds"][bname]
+                    if active_t == bname:
+                        st.session_state.pop("dm_active_t_build", None)
+                    st.rerun()
 
 # ---------------------------------------------------------------------------
-# Page layout
+# Page layout — mode / damage type / attack type radios
 # ---------------------------------------------------------------------------
-col_mode, col_dmg = st.columns([1, 2])
+col_mode, col_dmg, col_atk = st.columns([1, 2, 2])
 with col_mode:
     mode = st.radio("Mode", ["PVE", "PVP"], horizontal=True, key="dm_mode")
 with col_dmg:
@@ -574,6 +608,27 @@ with col_dmg:
             "Penetration: non-crit hits — multiplier = 1 + PEN−DEF (or 1 + 2×(PEN−DEF) − 1.5 if PEN−DEF > 150%)."
         ),
     )
+with col_atk:
+    atk_type = st.radio(
+        "Attack Type", ["Normal Attack", "Skill Attack"], horizontal=True, key="dm_atk_type",
+        help="Normal Attack: attack_mult=8, P/MATK%=100, hits=1.  Skill Attack: attack_mult=16, user-defined P/MATK% and hits.",
+    )
+
+_is_skill = atk_type == "Skill Attack"
+col_pmatk, col_hits, _ = st.columns([1, 1, 4])
+with col_pmatk:
+    pmatk_pct = st.number_input(
+        "P/MATK% Modifier", min_value=0, max_value=99999, value=100, step=1,
+        key="dm_pmatk_pct", disabled=not _is_skill,
+        help="Skill P/MATK% coefficient applied to P.ATK in the base formula (100 = 1×).",
+    )
+with col_hits:
+    num_hits = st.number_input(
+        "Number of Hits", min_value=1, max_value=99, value=1, step=1,
+        key="dm_num_hits", disabled=not _is_skill,
+        help="Number of times the skill hits. Final damage = single-hit multiplier × hits.",
+    )
+
 
 @st.fragment
 def _stat_input_section():
@@ -583,14 +638,13 @@ def _stat_input_section():
     _target_fields = _PVE_TARGET_FIELDS if _mode == "PVE" else _PVP_TARGET_FIELDS
     _groups = _get_groups(_mode)
 
-    # Reset all expander states when the mode changes (PVE↔PVP).
-    _state_key = f"{_mode}"
+    # Reset expander states when mode changes
     _prev_mode = st.session_state.get("dm_mode_prev")
-    if _prev_mode != _state_key:
+    if _prev_mode != _mode:
         for _lbl in ["Base Attack", "Crit", "Penetration", "Final P.DMG",
                      "Size", "Element", "Race", "Final DMG", "PVP DMG"]:
             st.session_state.pop(f"dm_exp_{_lbl}", None)
-        st.session_state["dm_mode_prev"] = _state_key
+        st.session_state["dm_mode_prev"] = _mode
 
     _player_vals: dict = {}
     _target_vals: dict = {}
@@ -599,18 +653,13 @@ def _stat_input_section():
         _exp_key = f"dm_exp_{_grp_label}"
         st.session_state.setdefault(_exp_key, False)
 
-        # on_change fires before the rerun, so setting the key here guarantees
-        # the expander re-renders as open when an input inside it changes.
-        # Suppressed during programmatic resets to prevent all expanders opening.
         def _mark_open(_k=_exp_key):
             if not st.session_state.get("_dm_resetting"):
                 st.session_state[_k] = True
 
-        _icon = _GROUP_ICONS.get(_grp_label, '')
+        _icon    = _GROUP_ICONS.get(_grp_label, '')
         _summary = _group_summary(_p_keys, _t_keys, _player_fields, _target_fields, _mode, _effective_fn)
-        # Keep the label stable across damage-type toggles — label changes cause
-        # Streamlit to treat the expander as a new component and reset its state.
-        _header = f"{_icon} **{_grp_label}**  ·  {_summary}"
+        _header  = f"{_icon} **{_grp_label}**  ·  {_summary}"
         with st.expander(_header, expanded=st.session_state[_exp_key]):
             _col_a, _col_b = st.columns(2)
             with _col_a:
@@ -631,25 +680,27 @@ def _stat_input_section():
                         on_change=_mark_open,
                     )
 
-    # Publish current values so the Calculate button (outside the fragment) can read them.
     st.session_state["_dm_player_vals"] = _player_vals
     st.session_state["_dm_target_vals"] = _target_vals
-    # Clear the reset flag so future interactions work normally.
     st.session_state.pop("_dm_resetting", None)
 
 _stat_input_section()
 
+
 def _reset_inputs():
-    """on_click callback — runs at the start of the rerun, before widgets are instantiated."""
-    _mode = st.session_state.get("dm_mode", "PVE")
-    _p_fields, _t_fields = _ALL_FIELDS[_mode]
-    # Set keys to defaults (not pop) so widgets re-render with correct values.
-    for _f, (_, _default) in _p_fields.items():
-        st.session_state[_field_key(f"dm_p_{_mode}", _f)] = int(_default) if _f in _SELECT_FIELDS else _default
-    for _f, (_, _default) in _t_fields.items():
-        st.session_state[_field_key(f"dm_t_{_mode}", _f)] = _default
-    # Suppress _mark_open callbacks that would otherwise fire for every
-    # changed input and force all expanders open.
+    """Reset inputs to the currently active build (or defaults if none is active)."""
+    active_p = st.session_state.get("dm_active_p_build")
+    if active_p and active_p in st.session_state.get("player_builds", {}):
+        _apply_player_build(st.session_state["player_builds"][active_p])
+    else:
+        _apply_player_defaults()
+
+    active_t = st.session_state.get("dm_active_t_build")
+    if active_t and active_t in st.session_state.get("target_builds", {}):
+        _apply_target_build(st.session_state["target_builds"][active_t])
+    else:
+        _apply_target_defaults()
+
     st.session_state["_dm_resetting"] = True
     st.session_state.pop("dm_results", None)
 
@@ -658,24 +709,30 @@ col_calc, col_reset, _ = st.columns([1, 1, 6])
 with col_calc:
     _do_calculate = st.button("Calculate", key="dm_btn", type="primary", use_container_width=True)
 with col_reset:
-    st.button("↺ Reset", use_container_width=True, help="Reset all inputs to default values",
+    st.button("↺ Reset", use_container_width=True,
+              help="Reset inputs to the currently selected build",
               on_click=_reset_inputs)
+
 if _do_calculate:
     player_vals = st.session_state.get("_dm_player_vals", {})
     target_vals = st.session_state.get("_dm_target_vals", {})
     p_dec = _pct_to_decimal(player_vals)
     t_dec = _pct_to_decimal(target_vals)
     _dmg_type_param = "pen" if st.session_state.get("dm_dmg_type") == "Penetration" else "crit"
-    multiplier = _calculate(mode, p_dec, t_dec, _dmg_type_param)
-    weights = _weights(mode, p_dec, t_dec, _dmg_type_param)
+    _is_skill_calc  = st.session_state.get("dm_atk_type") == "Skill Attack"
+    _attack_mult    = 16 if _is_skill_calc else 8
+    _pmatk_pct      = st.session_state.get("dm_pmatk_pct", 100) if _is_skill_calc else 100
+    _num_hits       = st.session_state.get("dm_num_hits", 1) if _is_skill_calc else 1
+    p_dec = dict(p_dec)
+    p_dec['patk'] = p_dec['patk'] * _pmatk_pct / 100
+    multiplier = _calculate(mode, p_dec, t_dec, _dmg_type_param, _attack_mult) * _num_hits
+    weights    = _weights(mode, p_dec, t_dec, _dmg_type_param, _attack_mult)
 
-    # Scale PCT fields so weights represent change-per-1-unit-of-user-input.
+    # Scale PCT fields so weights represent change-per-1-unit-of-user-input
     weights = {k: (v * 0.01 if k in _PCT_FIELDS else v) for k, v in weights.items()}
-
-    # Exclude static select-box fields from comparison charts
+    # Exclude static select-box fields
     weights = {k: v for k, v in weights.items() if k not in _SELECT_FIELDS}
-
-    # Exclude the inactive damage-type stat from the chart
+    # Exclude the inactive damage-type stat
     if _dmg_type_param == "crit":
         weights.pop('total_final_pen', None)
     else:
@@ -685,15 +742,14 @@ if _do_calculate:
     labels_map = {field: label for field, (label, _) in p_fields.items()}
     positive_weights = {k: v for k, v in weights.items() if v > 0}
 
-    # Persist results so reruns from the reference selectbox don't clear them.
     st.session_state["dm_results"] = {
         "multiplier":       multiplier,
         "weights":          weights,
         "labels_map":       labels_map,
         "positive_weights": positive_weights,
         "best_stat":        max(positive_weights, key=positive_weights.get),
+        "num_hits":         _num_hits,
     }
-    # Reset reference stat so it defaults to the best stat on new calculations.
     st.session_state.pop("dm_ref", None)
 
 if "dm_results" in st.session_state:
@@ -704,14 +760,16 @@ if "dm_results" in st.session_state:
     positive_weights = res["positive_weights"]
     best_stat        = res["best_stat"]
 
-    # Hero metric card
+    _res_atk_type = st.session_state.get("dm_atk_type", "Normal Attack")
+    _res_hits     = res.get("num_hits", 1)
+    _res_subtitle = _res_atk_type + (f"  ·  {_res_hits} hit{'s' if _res_hits != 1 else ''}" if _res_hits > 1 else "")
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, rgba(231,76,60,0.15) 0%, rgba(26,26,46,0.6) 100%);
                 border: 1px solid rgba(231,76,60,0.5); border-radius: 12px;
                 padding: 20px 32px; text-align: center; margin: 16px 0;">
         <div style="font-size: 12px; color: #aaa; letter-spacing: 2px;
                     text-transform: uppercase; margin-bottom: 4px;">
-            Damage Multiplier
+            Damage Multiplier  ·  {_res_subtitle}
         </div>
         <div style="font-size: 56px; font-weight: 800; color: #e74c3c; line-height: 1.1;">
             {multiplier:,.2f}
@@ -727,7 +785,6 @@ if "dm_results" in st.session_state:
         "Score is always normalized to the absolute best stat = 1.00. "
         "The equivalence column shows how many points of each stat equal 1 point of the reference."
     )
-    # Best stat callout
     st.markdown(f"""
     <div style="background: rgba(46,204,113,0.1); border-left: 3px solid #2ecc71;
                 border-radius: 0 6px 6px 0; padding: 8px 14px; margin-bottom: 12px;">
@@ -768,14 +825,9 @@ with col_cmp_dmg:
 _cmp_p_fields = _PVE_PLAYER_FIELDS if cmp_mode == "PVE" else _PVP_PLAYER_FIELDS
 _cmp_t_fields = _PVE_TARGET_FIELDS if cmp_mode == "PVE" else _PVP_TARGET_FIELDS
 
-_cmp_player_builds = {
-    k: v for k, v in st.session_state.get("player_builds", {}).items()
-    if v.get("mode") == cmp_mode
-}
-_cmp_target_builds = {
-    k: v for k, v in st.session_state.get("target_builds", {}).items()
-    if v.get("mode") == cmp_mode
-}
+# All builds now work across modes — no mode filtering
+_cmp_player_builds = st.session_state.get("player_builds", {})
+_cmp_target_builds = st.session_state.get("target_builds", {})
 
 col_cmp_t, col_cmp_p = st.columns(2)
 
@@ -792,18 +844,16 @@ with col_cmp_p:
             label_visibility="collapsed", key="cmp_build_sel",
         )
     else:
-        st.caption(f"No {cmp_mode} player builds saved.")
+        st.caption("No player builds saved.")
         _sel_builds = []
 
 if _sel_builds:
-    # Resolve target stats
     if _sel_target == "— Current target —":
         _t_raw = _read_from_session(_cmp_t_fields, f"dm_t_{cmp_mode}")
     else:
         _t_raw = _read_from_build(_cmp_target_builds[_sel_target]["stats"], _cmp_t_fields)
     _t_dec = _pct_to_decimal(_t_raw)
 
-    # Calculate multiplier for each selected build
     _cmp_dmg_param = "pen" if cmp_dmg_type == "Penetration" else "crit"
     _cmp_results = {}
     for _bname in _sel_builds:
@@ -824,4 +874,4 @@ if _sel_builds:
     )
     st.plotly_chart(_cmp_fig, use_container_width=True)
 else:
-    st.info(f"Select at least one {cmp_mode} player build above to see the comparison.")
+    st.info("Select at least one player build above to see the comparison.")

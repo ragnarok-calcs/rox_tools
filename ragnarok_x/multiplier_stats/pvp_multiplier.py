@@ -64,11 +64,13 @@ class TargetStats:
 #            = (1 + pen_diff×2 - 1.5)   if pen_diff >  1.5
 # ---------------------------------------------------------------------------
 def calculate_multiplier(
-    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit",
+    attack_mult: int = 8,
 ) -> float:
     """Return the overall PVP damage multiplier for the given player and target stats.
 
     damage_type: "crit" (default) or "pen" (penetration).
+    attack_mult: 8 for normal attacks, 16 for skill attacks.
     """
     if damage_type == "pen":
         atk_mult = pen_multiplier(player.total_final_pen - target.total_final_def)
@@ -89,14 +91,15 @@ def calculate_multiplier(
         * max(1 + player.final_dmg_bonus - target.final_dmg_reduc, _FLOOR)
     )
     return (
-        (8 * inner ** 0.6 - target.pvp_pdmg_reduc)
+        (attack_mult * inner ** 0.6 - target.pvp_pdmg_reduc)
         * max(1 + player.pvp_final_pdmg_bonus - target.pvp_final_pdmg_reduc, _FLOOR)
         + player.pvp_pdmg_bonus
     )
 
 
 def modifier_weights(
-    player: PlayerStats, target: TargetStats, damage_type: str = "crit"
+    player: PlayerStats, target: TargetStats, damage_type: str = "crit",
+    attack_mult: int = 8,
 ) -> dict[str, float]:
     """
     Return the marginal value of each player stat via finite differences.
@@ -105,7 +108,7 @@ def modifier_weights(
     drop to 0 for any stat whose factor is pinned at the 0.2 floor.
     Note: stats inside the ^0.6 term have diminishing returns.
     """
-    base = calculate_multiplier(player, target, damage_type)
+    base = calculate_multiplier(player, target, damage_type, attack_mult)
     eps = 1e-4
     return {
         field: (
@@ -113,6 +116,7 @@ def modifier_weights(
                 dataclasses.replace(player, **{field: getattr(player, field) + eps}),
                 target,
                 damage_type,
+                attack_mult,
             ) - base
         ) / eps
         for field in player.__dataclass_fields__

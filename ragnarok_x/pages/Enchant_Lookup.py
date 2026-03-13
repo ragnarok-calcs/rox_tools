@@ -13,11 +13,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import json
 from pathlib import Path
-
+from build_store import render_sidebar
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Enchant Lookup", layout="wide")
+render_sidebar()
 st.title("Enchant Lookup")
 
 # ---------------------------------------------------------------------------
