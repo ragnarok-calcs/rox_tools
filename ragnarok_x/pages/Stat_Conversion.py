@@ -18,17 +18,18 @@ with tab1:
     st.caption("Convert a raw or %Final stat into its advanced stat value.")
 
     stat_choice = st.selectbox("Stat", STAT_OPTIONS, key="c_stat")
+    stat_cls = stat_factory(stat_choice)
 
-    if stat_choice in ('CD Reduction', 'CT Reduction'):
-        input_label = st.selectbox("Input type", ["Haste", "%Final Haste"], key="c_haste_type")
-        input_type = 'raw' if input_label == "Haste" else 'final'
-    else:
-        input_type = 'raw'
+    input_label = st.selectbox(
+        "Input type",
+        [stat_cls.raw_name, stat_cls.final_name],
+        key="c_input_type",
+    )
+    input_type = 'raw' if input_label == stat_cls.raw_name else 'final'
 
     amount = st.number_input("Amount", value=0.0, min_value=0.0, key="c_amount")
 
     if st.button("Calculate", key="c_btn"):
-        stat_cls = stat_factory(stat_choice)
         result = stat_cls.convert_input(input_type=input_type, input_val=amount)
         st.success(result)
 
