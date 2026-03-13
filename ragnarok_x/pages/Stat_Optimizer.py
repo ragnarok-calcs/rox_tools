@@ -1,7 +1,7 @@
 """
 Stat Optimization
 -----------------
-Select one offensive build and one target build. Reports effective multipliers
+Select one offensive build and one or more target builds. Reports effective multipliers
 per stat group and a ranked stat priority breakdown.
 """
 
@@ -24,7 +24,7 @@ render_sidebar()
 
 st.title("Stat Optimization")
 st.caption(
-    "Select an offensive build and a target build to see effective stat multipliers "
+    "Select an offensive build and one or more target builds to see effective stat multipliers "
     "and a ranked breakdown of stat investment priority."
 )
 
@@ -76,9 +76,13 @@ with col_off:
     sel_off = st.selectbox("Select offensive build", options=build_names,
                             key="so_off_build", label_visibility="collapsed")
 with col_def:
-    st.markdown("**Target Build**")
-    sel_def = st.selectbox("Select target build", options=build_names,
-                            key="so_def_build", label_visibility="collapsed")
+    st.markdown("**Target Builds**")
+    sel_def = st.multiselect("Select one or more target builds", options=build_names,
+                              key="so_def_builds", label_visibility="collapsed")
+
+if not sel_def:
+    st.info("Select at least one target build above.")
+    st.stop()
 
 st.divider()
 
@@ -91,27 +95,31 @@ _pmatk         = pmatk_pct if _is_skill else 100
 
 off_raw = dict(get_build_offensive(sel_off))
 off_raw['patk'] = off_raw['patk'] * _pmatk / 100
-def_raw = get_build_defensive(sel_def)
 
-weights = get_weights(mode, off_raw, def_raw, dmg_type_param, attack_mult)
+def_raws = {name: get_build_defensive(name) for name in sel_def}
+multi = len(sel_def) > 1
 
-# Remove inactive damage-type stat
-if dmg_type_param == "crit":
-    weights.pop('total_final_pen', None)
-else:
-    weights.pop('crit_dmg_bonus', None)
-
-# Remove static select fields and zero/negative weights for priority display
-weights = {k: v for k, v in weights.items() if k not in SELECT_FIELDS}
-positive_weights = {k: v for k, v in weights.items() if v > 0}
-
-labels_map = {f: label for f, (label, _) in OFFENSIVE_FIELDS.items()}
+# Weights per target (inactive dmg-type stat and select fields removed)
+all_weights: dict[str, dict[str, float]] = {}
+for def_name in sel_def:
+    w = get_weights(mode, off_raw, def_raws[def_name], dmg_type_param, attack_mult)
+    if dmg_type_param == "crit":
+        w.pop('total_final_pen', None)
+    else:
+        w.pop('crit_dmg_bonus', None)
+    all_weights[def_name] = {k: v for k, v in w.items() if k not in SELECT_FIELDS}
 
 # ---------------------------------------------------------------------------
 # Effective multipliers per group
 # ---------------------------------------------------------------------------
 st.markdown("#### Effective Multipliers by Group")
-st.caption("Shows the net multiplicative factor each stat group contributes to the damage formula.")
+if multi:
+    st.caption(
+        "Net multiplicative factor each stat group contributes. "
+        "Avg shown; Min – Max range below (across selected target builds)."
+    )
+else:
+    st.caption("Shows the net multiplicative factor each stat group contributes to the damage formula.")
 
 eff_cols = st.columns(4)
 col_idx = 0
@@ -125,20 +133,37 @@ for grp_label, icon, off_keys, def_keys, eff_pve, eff_pvp in EDITOR_GROUPS:
         continue
 
     o_vals = {f: off_raw.get(f, OFFENSIVE_FIELDS[f][1]) for f in off_keys}
-    d_vals = {f: def_raw.get(f, DEFENSIVE_FIELDS[f][1]) for f in def_keys}
-    try:
-        eff = eff_fn(o_vals, d_vals)
-    except Exception:
+
+    effs = []
+    for def_name in sel_def:
+        d_vals = {f: def_raws[def_name].get(f, DEFENSIVE_FIELDS[f][1]) for f in def_keys}
+        try:
+            effs.append(eff_fn(o_vals, d_vals))
+        except Exception:
+            pass
+
+    if not effs:
         continue
 
+    avg_eff = sum(effs) / len(effs)
+    color = "#2ecc71" if avg_eff >= 1.0 else "#e74c3c"
+
     with eff_cols[col_idx % 4]:
-        color = "#2ecc71" if eff >= 1.0 else "#e74c3c"
+        range_html = ""
+        if multi:
+            min_eff = min(effs)
+            max_eff = max(effs)
+            range_html = (
+                f'<div style="font-size:11px; color:#888; margin-top:4px;">'
+                f'↕ {min_eff:.3f}× – {max_eff:.3f}×</div>'
+            )
         st.markdown(f"""
         <div style="background:rgba(255,255,255,0.05); border-radius:8px;
                     padding:12px 14px; margin-bottom:10px; text-align:center;">
             <div style="font-size:11px; color:#888; text-transform:uppercase;
                         letter-spacing:1px; margin-bottom:4px;">{icon} {grp_label}</div>
-            <div style="font-size:28px; font-weight:700; color:{color};">{eff:.3f}×</div>
+            <div style="font-size:28px; font-weight:700; color:{color};">{avg_eff:.3f}×</div>
+            {range_html}
         </div>
         """, unsafe_allow_html=True)
     col_idx += 1
@@ -149,17 +174,51 @@ st.divider()
 # Stat priority
 # ---------------------------------------------------------------------------
 st.markdown("#### Stat Priority")
-st.caption(
-    "Bars show relative priority vs the selected reference stat (★). "
-    "Score is normalized so the best stat = 1.00. "
-    "Equivalence shows how many points of each stat equal 1 point of the reference."
-)
+if multi:
+    st.caption(
+        "Ranked by average normalized priority across all target builds. "
+        "Score is normalized so the best stat = 1.00. "
+        "Equivalence shows how many points of each stat equal 1 point of the reference (★). "
+        "Per-target scores are shown beneath each stat."
+    )
+else:
+    st.caption(
+        "Bars show relative priority vs the selected reference stat (★). "
+        "Score is normalized so the best stat = 1.00. "
+        "Equivalence shows how many points of each stat equal 1 point of the reference."
+    )
 
-if not positive_weights:
+labels_map = {f: label for f, (label, _) in OFFENSIVE_FIELDS.items()}
+
+# Collect all fields with a positive weight in at least one target
+all_fields: set[str] = set()
+for w in all_weights.values():
+    all_fields.update(k for k, v in w.items() if v > 0)
+
+if not all_fields:
     st.warning("No positive-weight stats found for the current configuration.")
     st.stop()
 
-best_stat = max(positive_weights, key=positive_weights.get)
+# Normalise each target's weights independently (best stat per target = 1.0),
+# then average those per-target scores → main bar value.
+# Sub-bars use the same denominator as the main bars.
+norm_by_target: dict[str, dict[str, float]] = {}
+for def_name, w in all_weights.items():
+    pos_vals = [v for v in w.values() if v > 0]
+    max_w = max(pos_vals) if pos_vals else 1.0
+    norm_by_target[def_name] = {f: w.get(f, 0.0) / max_w for f in all_fields}
+
+avg_norm = {
+    f: sum(norm_by_target[d].get(f, 0.0) for d in sel_def) / len(sel_def)
+    for f in all_fields
+}
+avg_norm = {f: v for f, v in avg_norm.items() if v > 0}
+
+if not avg_norm:
+    st.warning("No positive-weight stats found for the current configuration.")
+    st.stop()
+
+best_stat = max(avg_norm, key=avg_norm.get)
 
 st.markdown(f"""
 <div style="background: rgba(46,204,113,0.1); border-left: 3px solid #2ecc71;
@@ -169,7 +228,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-ref_options = sorted(positive_weights.keys(), key=lambda k: labels_map[k])
+ref_options = sorted(avg_norm.keys(), key=lambda k: labels_map[k])
 current_ref = st.session_state.get("so_ref", best_stat)
 if current_ref not in ref_options:
     current_ref = best_stat
@@ -180,10 +239,8 @@ reference = st.selectbox(
     key="so_ref",
 )
 
-# Render priority table
-ref_w  = positive_weights[reference]
-max_w  = max(positive_weights.values())
-sorted_items = sorted(positive_weights.items(), key=lambda x: x[1], reverse=True)
+ref_avg      = avg_norm[reference]
+sorted_items = sorted(avg_norm.items(), key=lambda x: x[1], reverse=True)
 ref_label = labels_map[reference]
 
 header_html = f"""
@@ -197,24 +254,28 @@ header_html = f"""
     <div style="flex:1; text-align:right;">Per 1 {ref_label}</div>
 </div>
 """
+
 rows_html = ""
-for rank, (field, w) in enumerate(sorted_items):
-    label    = labels_map[field]
-    is_ref   = field == reference
-    norm     = w / max_w
-    equiv    = ref_w / w
+for rank, (field, avg_v) in enumerate(sorted_items):
+    label  = labels_map[field]
+    is_ref = field == reference
+    norm   = avg_v
+    equiv  = ref_avg / avg_v if avg_v > 0 else 0
+
     if rank == 0:
         bg, fg = '#FFD700', '#1a1a1a'
     elif rank <= 2:
         bg, fg = '#2ecc71', '#ffffff'
     else:
         bg, fg = '#5dade2', '#ffffff'
+
     bar_w  = int(norm * 100)
     n_sty  = "font-weight:700;" if is_ref else ""
     star   = " ★" if is_ref else ""
     eq_str = "1.00" if is_ref else f"{equiv:.2f}"
+
     rows_html += f"""
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:{'4px' if multi else '7px'};">
         <div style="background:{bg}; color:{fg}; border-radius:50%;
                     width:26px; height:26px; display:flex; align-items:center;
                     justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">
@@ -231,5 +292,21 @@ for rank, (field, w) in enumerate(sorted_items):
         </div>
     </div>
     """
+
+    if multi:
+        for def_name in sel_def:
+            t_norm  = norm_by_target[def_name].get(field, 0.0)
+            t_bar_w = int(t_norm * 100)
+            rows_html += f"""
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px; padding-left:34px; opacity:0.65;">
+        <div style="flex:2; font-size:11px; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{def_name}</div>
+        <div style="flex:3; background:rgba(255,255,255,0.05); border-radius:3px; height:7px; overflow:hidden;">
+            <div style="width:{t_bar_w}%; height:100%; background:{bg}; border-radius:3px; opacity:0.55;"></div>
+        </div>
+        <div style="flex:1; text-align:right; font-family:monospace; font-size:11px; color:#888; padding-right:8px;">{t_norm:.2f}</div>
+        <div style="flex:1;"></div>
+    </div>
+            """
+        rows_html += '<div style="margin-bottom:10px;"></div>'
 
 st.html(header_html + rows_html)
