@@ -255,6 +255,22 @@ header_html = f"""
 </div>
 """
 
+def _score_color(score: float) -> tuple[str, str]:
+    """Interpolate bg color across blue→green→gold based on score in [0, 1]."""
+    anchors = [(1.0, (255, 215, 0)), (0.5, (46, 204, 113)), (0.0, (93, 173, 226))]
+    rgb = (93, 173, 226)
+    for i in range(len(anchors) - 1):
+        hi_v, hi_c = anchors[i]
+        lo_v, lo_c = anchors[i + 1]
+        if score >= lo_v:
+            t = (score - lo_v) / (hi_v - lo_v) if hi_v != lo_v else 1.0
+            rgb = tuple(int(lo_c[j] + t * (hi_c[j] - lo_c[j])) for j in range(3))
+            break
+    bg = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'
+    fg = '#1a1a1a'
+    return bg, fg
+
+
 rows_html = ""
 for rank, (field, avg_v) in enumerate(sorted_items):
     label  = labels_map[field]
@@ -262,12 +278,7 @@ for rank, (field, avg_v) in enumerate(sorted_items):
     norm   = avg_v
     equiv  = ref_avg / avg_v if avg_v > 0 else 0
 
-    if rank == 0:
-        bg, fg = '#FFD700', '#1a1a1a'
-    elif rank <= 2:
-        bg, fg = '#2ecc71', '#ffffff'
-    else:
-        bg, fg = '#5dade2', '#ffffff'
+    bg, fg = _score_color(norm)
 
     bar_w  = int(norm * 100)
     n_sty  = "font-weight:700;" if is_ref else ""
