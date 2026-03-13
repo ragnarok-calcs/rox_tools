@@ -309,12 +309,11 @@ def render_sidebar():
         st.divider()
         st.sidebar.markdown("**⚔️ Build Testing**")
         st.sidebar.page_link("pages/Build_Editor.py", label="Build Editor")
-        st.sidebar.page_link("pages/DMG_Calculator.py", label="Damage Calculator")
-        st.sidebar.page_link("pages/Stat_Optimizer.py", label="Stat Optimizer")
+        st.sidebar.page_link("pages/DMG_Calculator.py", label=" ⤷ Damage Calculator")
+        st.sidebar.page_link("pages/Stat_Optimizer.py", label=" ⤷ Stat Optimizer")
 
         st.divider()
         st.header("Upload/Download Builds")
-
         # ── File uploader (hidden once a file has been loaded) ────────────
         if not st.session_state.get("_bs_file_loaded"):
             uploaded_files = st.file_uploader(

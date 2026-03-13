@@ -24,8 +24,8 @@ render_sidebar()
 
 st.title("Stat Optimization")
 st.caption(
-    "Select an offensive build and a target build to see effective multipliers per "
-    "stat group and a ranked breakdown of stat investment priority."
+    "Select an offensive build and a target build to see effective stat multipliers "
+    "and a ranked breakdown of stat investment priority."
 )
 
 init_store()
