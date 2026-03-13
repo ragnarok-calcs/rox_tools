@@ -347,11 +347,11 @@ def render_sidebar():
                     st.rerun()
         else:
             loaded_name = st.session_state.get("_bs_loaded_filename", "builds")
-            col_fn, col_clr = st.columns([5, 2])
+            col_fn, col_clr = st.columns([5, 2], vertical_alignment="center")
             with col_fn:
                 st.caption(f"📄 {loaded_name}")
             with col_clr:
-                if st.button("✕", key="bs_clear_file", use_container_width=True,
+                if st.button(":red[✕]", key="bs_clear_file", width="content", type="tertiary",
                              help="Remove the loaded file and clear all builds"):
                     for key in list(st.session_state.keys()):
                         if key.startswith("_bs_loaded_") or key in ("_bs_file_loaded", "bs_uploader"):
@@ -375,16 +375,16 @@ def render_sidebar():
         # ── Build list ────────────────────────────────────────────────────
         if builds:
             for bname in list(builds.keys()):
-                col_n, col_edit, col_del = st.columns([4, 1, 1])
+                col_n, col_edit, col_del = st.columns([5, 1, 1], vertical_alignment="center")
                 with col_n:
                     st.markdown(bname)
                 with col_edit:
                     if st.button("✏️", key=f"bs_edit_{bname}", help=f"Edit {bname}",
-                                 use_container_width=True):
+                                 width="content", type="tertiary"):
                         st.session_state["bs_editing"] = bname
                         st.switch_page("pages/Build_Editor.py")
                 with col_del:
-                    if st.button("🗑️", key=f"bs_del_{bname}", use_container_width=True):
+                    if st.button("🗑️", key=f"bs_del_{bname}", width="content", type="tertiary"):
                         delete_build(bname)
                         st.rerun()
             if st.button("＋ New Build", use_container_width=True, key="bs_new"):
