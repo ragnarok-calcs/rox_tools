@@ -30,34 +30,34 @@ from multiplier_stats import (
 # Field definitions: {field: (label, default)}
 # ---------------------------------------------------------------------------
 OFFENSIVE_FIELDS = {
-    'patk':                 ('P.ATK',                   1000),
-    'crit_dmg_bonus':       ('Crit DMG Bonus %',         200),
-    'pdmg_bonus':           ('P.DMG Bonus',              0),
-    'pdmg_bonus_pct':       ('P.DMG Bonus%',             0),
-    'final_pdmg_bonus':     ('Final P.DMG Bonus %',      0),
-    'weapon_size_modifier': ('Weapon Size Modifier %',    100),
-    'size_enhance':         ('Bonus DMG to Size %',       0),
-    'elemental_counter':    ('Elemental Counter %',       100),
-    'element_enhance':      ('Element Enhance %',         0),
-    'bonus_dmg_element':    ('Bonus DMG to Element %',    0),
-    'bonus_dmg_race':       ('Bonus DMG to Race %',       0),
-    'final_dmg_bonus':      ('Final DMG Bonus %',         0),
-    'pvp_final_pdmg_bonus': ('PVP Final P.DMG Bonus %',   0),
-    'pvp_pdmg_bonus':       ('PVP P.DMG Bonus',          0),
-    'total_final_pen':      ('Total Final PEN %',         0),
+    'patk':                 ('P/MATK',                        1000),
+    'crit_dmg_bonus':       ('Crit DMG Bonus %',               200),
+    'pdmg_bonus':           ('P.DMG/M.DMG Bonus',              0),
+    'pdmg_bonus_pct':       ('P.DMG/M.DMG Bonus %',            0),
+    'final_pdmg_bonus':     ('Final P.DMG/M.DMG Bonus %',      0),
+    'weapon_size_modifier': ('Weapon Size Modifier %',          100),
+    'size_enhance':         ('Bonus DMG to Size %',             0),
+    'elemental_counter':    ('Elemental Counter %',             100),
+    'element_enhance':      ('Element Enhance %',               0),
+    'bonus_dmg_element':    ('Bonus DMG to Element %',          0),
+    'bonus_dmg_race':       ('Bonus DMG to Race %',             0),
+    'final_dmg_bonus':      ('Final DMG Bonus %',               0),
+    'pvp_final_pdmg_bonus': ('PVP Final P.DMG/M.DMG Bonus %',  0),
+    'pvp_pdmg_bonus':       ('PVP P.DMG/M.DMG Bonus',          0),
+    'total_final_pen':      ('Total Final PEN %',               0),
 }
 
 DEFENSIVE_FIELDS = {
-    'crit_dmg_reduc':       ('Crit DMG Reduction %',       0),
-    'pdmg_reduc':           ('P.DMG Reduction',            0),
-    'final_pdmg_reduc':     ('Final P.DMG Reduction %',    0),
-    'element_resist':       ('Element Resist %',            0),
-    'size_reduc':           ('Size Reduction %',            0),
-    'race_reduc':           ('Race Reduction %',            0),
-    'final_dmg_reduc':      ('Final DMG Reduction %',       0),
-    'pvp_pdmg_reduc':       ('PVP P.DMG Reduction',         0),
-    'pvp_final_pdmg_reduc': ('PVP Final P.DMG Reduction %', 0),
-    'total_final_def':      ('Total Final DEF %',           0),
+    'crit_dmg_reduc':       ('Crit DMG Reduction %',              0),
+    'pdmg_reduc':           ('P.DMG/M.DMG Reduction',             0),
+    'final_pdmg_reduc':     ('Final P.DMG/M.DMG Reduction %',     0),
+    'element_resist':       ('Element Resist %',                   0),
+    'size_reduc':           ('Size Reduction %',                   0),
+    'race_reduc':           ('Race Reduction %',                   0),
+    'final_dmg_reduc':      ('Final DMG Reduction %',              0),
+    'pvp_pdmg_reduc':       ('PVP P.DMG/M.DMG Reduction',         0),
+    'pvp_final_pdmg_reduc': ('PVP Final P.DMG/M.DMG Reduction %', 0),
+    'total_final_def':      ('Total Final DEF %',                  0),
 }
 
 # Fields stored as integer percentages in UI (divided by 100 before formula use)
@@ -103,7 +103,7 @@ EDITOR_GROUPS = [
         lambda o, d: pen_multiplier((o['total_final_pen'] - d['total_final_def']) / 100),
         lambda o, d: pen_multiplier((o['total_final_pen'] - d['total_final_def']) / 100),
     ),
-    ('Final P.DMG',  '🎯',  ['final_pdmg_bonus'],                                     ['final_pdmg_reduc'],
+    ('Final P/M.DMG','🎯',  ['final_pdmg_bonus'],                                     ['final_pdmg_reduc'],
         lambda o, d: max(1 + (o['final_pdmg_bonus'] - d['final_pdmg_reduc']) / 100, 0.2),
         lambda o, d: max(1 + (o['final_pdmg_bonus'] - d['final_pdmg_reduc']) / 100, 0.2),
     ),
@@ -143,6 +143,15 @@ def _off_defaults() -> dict:
 def _def_defaults() -> dict:
     return {f: default for f, (_, default) in DEFENSIVE_FIELDS.items()}
 
+def _wm_defaults() -> dict:
+    return {
+        "weapon_type":      "one-handed",
+        "enchant_awakening": 0,
+        "main_enchants":    [None, None, None],
+        "sub_enchants":     [None, None, None],
+        "drake_card":       False,
+    }
+
 
 # ---------------------------------------------------------------------------
 # Session-state store helpers
@@ -158,12 +167,15 @@ def get_builds() -> dict:
     return st.session_state["builds"]
 
 
-def save_build(name: str, offensive: dict, defensive: dict):
+def save_build(name: str, offensive: dict, defensive: dict, weapon_meta: dict | None = None):
     init_store()
-    st.session_state["builds"][name] = {
+    entry: dict = {
         "offensive": dict(offensive),
         "defensive": dict(defensive),
     }
+    if weapon_meta is not None:
+        entry["weapon_meta"] = dict(weapon_meta)
+    st.session_state["builds"][name] = entry
 
 
 def delete_build(name: str):
@@ -187,6 +199,21 @@ def get_build_defensive(name: str) -> dict:
     return {f: raw.get(f, default) for f, (_, default) in DEFENSIVE_FIELDS.items()}
 
 
+def get_build_weapon_meta(name: str) -> dict:
+    builds = get_builds()
+    if name not in builds:
+        return _wm_defaults()
+    stored = builds[name].get("weapon_meta", {})
+    d = _wm_defaults()
+    return {
+        "weapon_type":       stored.get("weapon_type",       d["weapon_type"]),
+        "enchant_awakening": stored.get("enchant_awakening", d["enchant_awakening"]),
+        "main_enchants":     stored.get("main_enchants",     d["main_enchants"]),
+        "sub_enchants":      stored.get("sub_enchants",      d["sub_enchants"]),
+        "drake_card":        stored.get("drake_card",        d["drake_card"]),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Import / Export
 # ---------------------------------------------------------------------------
@@ -208,10 +235,13 @@ def import_builds_data(data: dict):
         for name, b in data["builds"].items():
             off = b.get("offensive", b.get("stats", {}))
             defn = b.get("defensive", {})
-            st.session_state["builds"][name] = {
+            entry = {
                 "offensive": {f: off.get(f, default) for f, (_, default) in OFFENSIVE_FIELDS.items()},
                 "defensive": {f: defn.get(f, default) for f, (_, default) in DEFENSIVE_FIELDS.items()},
             }
+            if "weapon_meta" in b:
+                entry["weapon_meta"] = b["weapon_meta"]
+            st.session_state["builds"][name] = entry
             n += 1
     elif "player_builds" in data or "target_builds" in data:
         # Legacy: merge player stats → offensive, target stats → defensive, keyed by shared names
@@ -241,6 +271,24 @@ def import_builds_data(data: dict):
 # ---------------------------------------------------------------------------
 def pct_to_decimal(vals: dict) -> dict:
     return {k: v / 100.0 if k in PCT_FIELDS else v for k, v in vals.items()}
+
+
+def apply_card_effects(off_raw: dict, def_raw: dict, weapon_meta: dict) -> tuple[dict, dict]:
+    """Return (off_raw, def_raw) copies with card effects applied.
+
+    Drake Card: makes the entire size multiplier exactly ×1.0 by zeroing
+    weapon_size_modifier to 100, size_enhance to 0, and size_reduc to 0.
+    This neutralises both the offensive size penalty and any defensive size
+    reduction, which is the correct in-game behaviour.
+    """
+    if not weapon_meta.get("drake_card", False):
+        return off_raw, def_raw
+    off_result = dict(off_raw)
+    def_result = dict(def_raw)
+    off_result["weapon_size_modifier"] = 100
+    off_result["size_enhance"] = 0
+    def_result["size_reduc"] = 0
+    return off_result, def_result
 
 
 def _off_for_mode(off_dec: dict, mode: str) -> dict:
@@ -276,8 +324,21 @@ def calculate(mode: str, off_raw: dict, def_raw: dict,
 
 
 def get_weights(mode: str, off_raw: dict, def_raw: dict,
-                dmg_type: str = "crit", attack_mult: int = 8) -> dict[str, float]:
-    """Return marginal weights for offensive stats (raw % units)."""
+                dmg_type: str = "crit", attack_mult: int = 8,
+                hybrid_crit_pct: float = 0.5) -> dict[str, float]:
+    """Return marginal weights for offensive stats (raw % units).
+
+    dmg_type "hybrid": weights are a weighted combination of crit and pen weights.
+    Since D_hybrid = crit_pct×D_crit + pen_pct×D_pen, its derivative is the same
+    linear combination: w_hybrid = crit_pct×w_crit + pen_pct×w_pen.
+    """
+    if dmg_type == "hybrid":
+        pen_pct = 1.0 - hybrid_crit_pct
+        w_crit = get_weights(mode, off_raw, def_raw, "crit", attack_mult)
+        w_pen  = get_weights(mode, off_raw, def_raw, "pen",  attack_mult)
+        return {k: hybrid_crit_pct * w_crit.get(k, 0.0) + pen_pct * w_pen.get(k, 0.0)
+                for k in set(w_crit) | set(w_pen)}
+
     off_dec = pct_to_decimal(off_raw)
     def_dec = pct_to_decimal(def_raw)
     if mode == "PVE":
@@ -310,6 +371,7 @@ def render_sidebar():
         st.divider()
         st.sidebar.markdown("**🔧 Tools**")
         st.sidebar.page_link("pages/Enchant_Lookup.py", label="Enchant Lookup")
+        st.sidebar.page_link("pages/Enchant_Optimizer.py", label="Enchant Optimizer")
         st.divider()
         st.sidebar.markdown("**⚔️ Build Testing**")
         st.sidebar.page_link("pages/Build_Editor.py", label="Build Editor")

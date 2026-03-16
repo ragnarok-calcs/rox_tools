@@ -12,33 +12,33 @@ _FLOOR = 0.2
 # ---------------------------------------------------------------------------
 @dataclass
 class PlayerStats:
-    patk: float                 # Physical Attack
+    patk: float                 # Physical/Magical Attack
     crit_dmg_bonus: float       # Crit DMG Bonus multiplier (e.g. 1.5 = +50% crit dmg)
-    pdmg_bonus: float           # Flat P.DMG Bonus
-    pdmg_bonus_pct: float       # % P.DMG Bonus (e.g. 0.20 = 20%)
-    final_pdmg_bonus: float     # Final P.DMG Bonus
+    pdmg_bonus: float           # Flat P.DMG/M.DMG Bonus
+    pdmg_bonus_pct: float       # % P.DMG/M.DMG Bonus (e.g. 0.20 = 20%)
+    final_pdmg_bonus: float     # Final P.DMG/M.DMG Bonus
     weapon_size_modifier: float # Weapon Size Modifier (e.g. 1.0 base)
     size_enhance: float         # Bonus DMG to Size
     bonus_dmg_race: float       # Bonus DMG to Race
     elemental_counter: float    # Elemental Counter (e.g. 1.5 for counter element)
     element_enhance: float      # Element Enhance
     final_dmg_bonus: float      # Final DMG Bonus
-    pvp_final_pdmg_bonus: float # PVP Final P.DMG Bonus
-    pvp_pdmg_bonus: float       # PVP P.DMG Bonus (flat additive, outside all factors)
+    pvp_final_pdmg_bonus: float # PVP Final P.DMG/M.DMG Bonus
+    pvp_pdmg_bonus: float       # PVP P.DMG/M.DMG Bonus (flat additive, outside all factors)
     total_final_pen: float = 0.0  # Total Final PEN (penetration mode only)
 
 
 @dataclass
 class TargetStats:
     crit_dmg_reduc: float       # Target's Crit DMG Reduction
-    pdmg_reduc: float           # Target's flat P.DMG Reduction
-    final_pdmg_reduc: float     # Target's Final P.DMG Reduction
+    pdmg_reduc: float           # Target's flat P.DMG/M.DMG Reduction
+    final_pdmg_reduc: float     # Target's Final P.DMG/M.DMG Reduction
     element_resist: float       # Target's Element Resist
     size_reduc: float           # Target's Size Reduction
     race_reduc: float           # Target's Race Reduction
     final_dmg_reduc: float      # Target's Final DMG Reduction
-    pvp_pdmg_reduc: float       # Target's PVP P.DMG Reduction
-    pvp_final_pdmg_reduc: float # Target's PVP Final P.DMG Reduction
+    pvp_pdmg_reduc: float       # Target's PVP P.DMG/M.DMG Reduction
+    pvp_final_pdmg_reduc: float # Target's PVP Final P.DMG/M.DMG Reduction
     total_final_def: float = 0.0  # Target's Total Final DEF (penetration mode only)
 
 
@@ -47,16 +47,16 @@ class TargetStats:
 #
 # Crit formula:
 #   (8 × (
-#       (P.ATK × (Crit DMG Bonus - Target Crit DMG Reduc)
-#        + P.DMG Bonus × (1 + P.DMG Bonus%) - Target P.DMG Reduc)
-#       × max(1 + Final P.DMG Bonus - Target Final P.DMG Reduc, 0.2)
+#       (P/MATK × (Crit DMG Bonus - Target Crit DMG Reduc)
+#        + P.DMG/M.DMG Bonus × (1 + P.DMG/M.DMG Bonus%) - Target P.DMG/M.DMG Reduc)
+#       × max(1 + Final P.DMG/M.DMG Bonus - Target Final P.DMG/M.DMG Reduc, 0.2)
 #       × max(Weapon Size Modifier + Size Enhance - Size Reduction, 0.2)
 #       × max(1 + Bonus DMG to Race - Race Reduction, 0.2)
 #       × max(Elemental Counter + Element Enhance - Element Resist, 0.2)
 #       × max(1 + Final DMG Bonus - Target Final DMG Reduc, 0.2)
-#   ) ^ 0.6 - Target PVP P.DMG Reduc)
-#   × max(1 + PVP Final P.DMG Bonus - Target PVP Final P.DMG Reduc, 0.2)
-#   + PVP P.DMG Bonus
+#   ) ^ 0.6 - Target PVP P.DMG/M.DMG Reduc)
+#   × max(1 + PVP Final P.DMG/M.DMG Bonus - Target PVP Final P.DMG/M.DMG Reduc, 0.2)
+#   + PVP P.DMG/M.DMG Bonus
 #
 # Penetration formula replaces the ATK multiplier:
 #   pen_diff = Total Final PEN - Target Total Final DEF

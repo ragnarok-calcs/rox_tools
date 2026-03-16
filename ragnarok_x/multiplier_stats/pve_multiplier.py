@@ -10,11 +10,11 @@ _FLOOR = 0.2
 # ---------------------------------------------------------------------------
 @dataclass
 class PlayerStats:
-    patk: float                 # Physical Attack
+    patk: float                 # Physical/Magical Attack
     crit_dmg_bonus: float       # Crit DMG Bonus multiplier (e.g. 1.5 = +50% crit dmg)
-    pdmg_bonus: float           # Flat P.DMG Bonus
-    pdmg_bonus_pct: float       # % P.DMG Bonus (e.g. 0.20 = 20%)
-    final_pdmg_bonus: float     # Final P.DMG Bonus
+    pdmg_bonus: float           # Flat P.DMG/M.DMG Bonus
+    pdmg_bonus_pct: float       # % P.DMG/M.DMG Bonus (e.g. 0.20 = 20%)
+    final_pdmg_bonus: float     # Final P.DMG/M.DMG Bonus
     elemental_counter: float    # Elemental Counter (e.g. 1.5 for counter element)
     element_enhance: float      # Element Enhance
     bonus_dmg_element: float    # Bonus DMG to Element
@@ -28,8 +28,8 @@ class PlayerStats:
 @dataclass
 class TargetStats:
     crit_dmg_reduc: float       # Target's Crit DMG Reduction
-    pdmg_reduc: float           # Target's flat P.DMG Reduction
-    final_pdmg_reduc: float     # Target's Final P.DMG Reduction
+    pdmg_reduc: float           # Target's flat P.DMG/M.DMG Reduction
+    final_pdmg_reduc: float     # Target's Final P.DMG/M.DMG Reduction
     final_dmg_reduc: float      # Target's Final DMG Reduction
     total_final_def: float = 0.0  # Target's Total Final DEF (penetration mode only)
 
@@ -38,9 +38,9 @@ class TargetStats:
 # Core functions
 #
 # Crit formula:
-#   (P.ATK × (Crit DMG Bonus - Target Crit DMG Reduc)
-#    + P.DMG Bonus × (1 + P.DMG Bonus%) - Target P.DMG Reduc)
-#   × max(1 + Final P.DMG Bonus - Target Final P.DMG Reduc, 0.2)
+#   (P/MATK × (Crit DMG Bonus - Target Crit DMG Reduc)
+#    + P.DMG/M.DMG Bonus × (1 + P.DMG/M.DMG Bonus%) - Target P.DMG/M.DMG Reduc)
+#   × max(1 + Final P.DMG/M.DMG Bonus - Target Final P.DMG/M.DMG Reduc, 0.2)
 #   × max(Elemental Counter + Element Enhance, 0.2)
 #   × (1 + Bonus DMG to Element)
 #   × (1 + Bonus DMG to Race)

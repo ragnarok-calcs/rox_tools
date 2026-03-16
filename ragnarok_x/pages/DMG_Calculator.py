@@ -15,8 +15,8 @@ from build_store import (
     OFFENSIVE_FIELDS,
     PCT_FIELDS, SELECT_FIELDS,
     init_store, get_builds,
-    get_build_offensive, get_build_defensive,
-    calculate, render_sidebar,
+    get_build_offensive, get_build_defensive, get_build_weapon_meta,
+    apply_card_effects, calculate, render_sidebar,
 )
 
 st.set_page_config(page_title="DMG Calculator", layout="wide")
@@ -105,13 +105,16 @@ _hits          = num_hits if _is_skill else 1
 # results[off_name][def_name] = damage
 results: dict[str, dict[str, float]] = {}
 for off_name in sel_off:
-    off_raw = dict(get_build_offensive(off_name))
-    off_raw['patk'] = off_raw['patk'] * _pmatk / 100
+    base_off_raw = dict(get_build_offensive(off_name))
+    wm = get_build_weapon_meta(off_name)
     results[off_name] = {}
     for def_name in sel_def:
         def_raw = get_build_defensive(def_name)
+        off_raw, eff_def_raw = apply_card_effects(base_off_raw, def_raw, wm)
+        off_raw = dict(off_raw)
+        off_raw['patk'] = off_raw['patk'] * _pmatk / 100
         results[off_name][def_name] = (
-            calculate(mode, off_raw, def_raw, dmg_type_param, attack_mult) * _hits
+            calculate(mode, off_raw, eff_def_raw, dmg_type_param, attack_mult) * _hits
         )
 
 # ---------------------------------------------------------------------------

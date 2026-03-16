@@ -15,8 +15,8 @@ from build_store import (
     OFFENSIVE_FIELDS, DEFENSIVE_FIELDS,
     PCT_FIELDS, SELECT_FIELDS, EDITOR_GROUPS,
     init_store, get_builds,
-    get_build_offensive, get_build_defensive,
-    get_weights, render_sidebar,
+    get_build_offensive, get_build_defensive, get_build_weapon_meta,
+    apply_card_effects, get_weights, render_sidebar,
 )
 
 st.set_page_config(page_title="Stat Optimization", layout="wide")
@@ -44,8 +44,11 @@ with col_mode:
     mode = st.radio("Mode", ["PVE", "PVP"], horizontal=True, key="so_mode")
 with col_dmg:
     dmg_type = st.radio(
-        "Damage Type", ["Crit", "Penetration"], horizontal=True, key="so_dmg_type",
-        help="Crit or Penetration — affects which ATK multiplier is used.",
+        "Damage Type", ["Crit", "Penetration", "Hybrid"], horizontal=True, key="so_dmg_type",
+        help=(
+            "Crit or Penetration — uses a single ATK multiplier.  "
+            "Hybrid — weights both; stat priorities reflect the blended damage."
+        ),
     )
 with col_atk:
     atk_type = st.radio(
@@ -53,7 +56,8 @@ with col_atk:
     )
 
 _is_skill = atk_type == "Skill Attack"
-col_pmatk, col_hits, _ = st.columns([1, 1, 4])
+_is_hybrid = dmg_type == "Hybrid"
+col_pmatk, col_hits, col_hybrid = st.columns([1, 1, 2])
 with col_pmatk:
     pmatk_pct = st.number_input(
         "P/MATK% Modifier", min_value=0, max_value=99999, value=100, step=1,
@@ -64,6 +68,17 @@ with col_hits:
         "Number of Hits", min_value=1, max_value=99, value=1, step=1,
         key="so_num_hits", disabled=not _is_skill,
     )
+with col_hybrid:
+    hybrid_crit_pct_raw = st.number_input(
+        "% of DMG from Crit", min_value=0, max_value=100, value=50, step=1,
+        key="so_hybrid_crit_pct", disabled=not _is_hybrid,
+        help="Percentage of total damage dealt as crit hits. Pen% = 100 − this value.",
+    )
+    if _is_hybrid:
+        pen_pct_display = 100 - hybrid_crit_pct_raw
+        st.caption(f"Crit {hybrid_crit_pct_raw}%  ·  Pen {pen_pct_display}%")
+
+hybrid_crit_pct = hybrid_crit_pct_raw / 100.0
 
 st.divider()
 
@@ -89,24 +104,36 @@ st.divider()
 # ---------------------------------------------------------------------------
 # Compute
 # ---------------------------------------------------------------------------
-dmg_type_param = "pen" if dmg_type == "Penetration" else "crit"
+dmg_type_param = "hybrid" if dmg_type == "Hybrid" else ("pen" if dmg_type == "Penetration" else "crit")
 attack_mult    = 16 if _is_skill else 8
 _pmatk         = pmatk_pct if _is_skill else 100
 
-off_raw = dict(get_build_offensive(sel_off))
-off_raw['patk'] = off_raw['patk'] * _pmatk / 100
+base_off_raw = dict(get_build_offensive(sel_off))
+wm = get_build_weapon_meta(sel_off)
 
 def_raws = {name: get_build_defensive(name) for name in sel_def}
 multi = len(sel_def) > 1
 
-# Weights per target (inactive dmg-type stat and select fields removed)
+# Apply card effects per (off, def) pair, then scale patk
+eff_off_raws: dict[str, dict] = {}
+eff_def_raws: dict[str, dict] = {}
+for def_name in sel_def:
+    eff_off, eff_def = apply_card_effects(base_off_raw, def_raws[def_name], wm)
+    eff_off = dict(eff_off)
+    eff_off['patk'] = eff_off['patk'] * _pmatk / 100
+    eff_off_raws[def_name] = eff_off
+    eff_def_raws[def_name] = eff_def
+
+# Weights per target (irrelevant dmg-type stat removed; hybrid keeps both)
 all_weights: dict[str, dict[str, float]] = {}
 for def_name in sel_def:
-    w = get_weights(mode, off_raw, def_raws[def_name], dmg_type_param, attack_mult)
+    w = get_weights(mode, eff_off_raws[def_name], eff_def_raws[def_name],
+                    dmg_type_param, attack_mult, hybrid_crit_pct)
     if dmg_type_param == "crit":
         w.pop('total_final_pen', None)
-    else:
+    elif dmg_type_param == "pen":
         w.pop('crit_dmg_bonus', None)
+    # hybrid: keep both crit_dmg_bonus and total_final_pen
     all_weights[def_name] = {k: v for k, v in w.items() if k not in SELECT_FIELDS}
 
 # ---------------------------------------------------------------------------
@@ -124,19 +151,26 @@ else:
 eff_cols = st.columns(4)
 col_idx = 0
 
-_skip_grp = "Penetration" if dmg_type_param == "crit" else "Crit"
+# For hybrid, show both Crit and Pen groups (labelled with their split weights).
+# For pure crit/pen, skip the inactive one.
+if dmg_type_param == "crit":
+    _skip_grps = {"Penetration"}
+elif dmg_type_param == "pen":
+    _skip_grps = {"Crit"}
+else:
+    _skip_grps = set()
+
 for grp_label, icon, off_keys, def_keys, eff_pve, eff_pvp in EDITOR_GROUPS:
-    if grp_label == _skip_grp:
+    if grp_label in _skip_grps:
         continue
     eff_fn = eff_pve if mode == "PVE" else eff_pvp
     if eff_fn is None:
         continue
 
-    o_vals = {f: off_raw.get(f, OFFENSIVE_FIELDS[f][1]) for f in off_keys}
-
     effs = []
     for def_name in sel_def:
-        d_vals = {f: def_raws[def_name].get(f, DEFENSIVE_FIELDS[f][1]) for f in def_keys}
+        o_vals = {f: eff_off_raws[def_name].get(f, OFFENSIVE_FIELDS[f][1]) for f in off_keys}
+        d_vals = {f: eff_def_raws[def_name].get(f, DEFENSIVE_FIELDS[f][1]) for f in def_keys}
         try:
             effs.append(eff_fn(o_vals, d_vals))
         except Exception:
@@ -147,6 +181,13 @@ for grp_label, icon, off_keys, def_keys, eff_pve, eff_pvp in EDITOR_GROUPS:
 
     avg_eff = sum(effs) / len(effs)
     color = "#2ecc71" if avg_eff >= 1.0 else "#e74c3c"
+
+    # For hybrid, annotate the Crit/Pen group labels with their split weights
+    display_label = grp_label
+    if _is_hybrid and grp_label == "Crit":
+        display_label = f"Crit ({hybrid_crit_pct_raw}%)"
+    elif _is_hybrid and grp_label == "Penetration":
+        display_label = f"Pen ({100 - hybrid_crit_pct_raw}%)"
 
     with eff_cols[col_idx % 4]:
         range_html = ""
@@ -161,7 +202,7 @@ for grp_label, icon, off_keys, def_keys, eff_pve, eff_pvp in EDITOR_GROUPS:
         <div style="background:rgba(255,255,255,0.05); border-radius:8px;
                     padding:12px 14px; margin-bottom:10px; text-align:center;">
             <div style="font-size:11px; color:#888; text-transform:uppercase;
-                        letter-spacing:1px; margin-bottom:4px;">{icon} {grp_label}</div>
+                        letter-spacing:1px; margin-bottom:4px;">{icon} {display_label}</div>
             <div style="font-size:28px; font-weight:700; color:{color};">{avg_eff:.3f}×</div>
             {range_html}
         </div>
