@@ -126,6 +126,7 @@ for def_name in sel_def:
 
 # Weights per target (irrelevant dmg-type stat removed; hybrid keeps both)
 all_weights: dict[str, dict[str, float]] = {}
+_drake_active = wm.get("drake_card", False)
 for def_name in sel_def:
     w = get_weights(mode, eff_off_raws[def_name], eff_def_raws[def_name],
                     dmg_type_param, attack_mult, hybrid_crit_pct)
@@ -134,6 +135,10 @@ for def_name in sel_def:
     elif dmg_type_param == "pen":
         w.pop('crit_dmg_bonus', None)
     # hybrid: keep both crit_dmg_bonus and total_final_pen
+    # Drake Card (PVE): size stats are overridden by the card and cannot be invested in
+    if _drake_active and mode == "PVE":
+        w.pop('weapon_size_modifier', None)
+        w.pop('size_enhance', None)
     all_weights[def_name] = {k: v for k, v in w.items() if k not in SELECT_FIELDS}
 
 # ---------------------------------------------------------------------------
