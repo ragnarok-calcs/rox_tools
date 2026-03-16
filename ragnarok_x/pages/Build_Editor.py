@@ -19,8 +19,8 @@ from build_store import (
 )
 from data.enchants_data import (
     get_enchant_awakening_info, get_weapon_enchant_options,
+    get_enchant_cities_for_stat, get_max_awakening_for_enchant_levels,
     ENCHANT_STAT_FIELD_MAP, ENCHANT_STAT_LABELS, QUALITY_OPTIONS,
-    MAX_ENCHANT_AWAKENING,
 )
 
 st.set_page_config(page_title="Build Editor", layout="wide")
@@ -87,18 +87,23 @@ if _prev_sel != selected:
     # Load weapon meta
     from build_store import _wm_defaults
     wm = _wm_defaults() if is_new else get_build_weapon_meta(selected)
-    st.session_state["be_wm_weapon_type"]  = wm["weapon_type"]
-    st.session_state["be_wm_awakening"]    = int(wm["enchant_awakening"])
-    st.session_state["be_wm_drake_card"]   = bool(wm.get("drake_card", False))
+    st.session_state["be_wm_weapon_type"]          = wm["weapon_type"]
+    st.session_state["be_wm_weapon_enchant_lvl"]   = int(wm.get("weapon_enchant_lvl", 0))
+    st.session_state["be_wm_armor_enchant_lvl"]    = int(wm.get("armor_enchant_lvl", 0))
+    st.session_state["be_wm_accessory_enchant_lvl"] = int(wm.get("accessory_enchant_lvl", 0))
+    st.session_state["be_wm_awakening"]            = int(wm["enchant_awakening"])
+    st.session_state["be_wm_drake_card"]           = bool(wm.get("drake_card", False))
     for i in range(3):
         enc = (wm["main_enchants"] or [None, None, None])
         slot = enc[i] if i < len(enc) else None
         st.session_state[f"be_wm_main_{i}_stat"] = slot["stat_en"] if slot else "None"
         st.session_state[f"be_wm_main_{i}_qual"] = slot["quality"] if slot else "Orange"
+        st.session_state[f"be_wm_main_{i}_city"] = slot.get("city") if slot else None
         enc = (wm["sub_enchants"] or [None, None, None])
         slot = enc[i] if i < len(enc) else None
         st.session_state[f"be_wm_sub_{i}_stat"] = slot["stat_en"] if slot else "None"
         st.session_state[f"be_wm_sub_{i}_qual"] = slot["quality"] if slot else "Orange"
+        st.session_state[f"be_wm_sub_{i}_city"] = slot.get("city") if slot else None
 
 # ---------------------------------------------------------------------------
 # Build name input
@@ -108,7 +113,6 @@ build_name = st.text_input("Build name", value=name_default, key="be_name",
                             placeholder="Enter a name for this build")
 
 st.divider()
-
 
 # ---------------------------------------------------------------------------
 # Input renderer
@@ -136,30 +140,34 @@ def _render_input(field: str, label: str, default, key: str):
 
 
 # ---------------------------------------------------------------------------
-# Grouped stat inputs (offensive left, defensive right)
+# Tabs
 # ---------------------------------------------------------------------------
+tab_stats, tab_enchants, tab_cards = st.tabs(["📊 Damage Stats", "⚗️ Enchants", "🃏 Cards"])
+
+# ── Tab 1: Damage Stats ───────────────────────────────────────────────────
 off_vals = {}
 def_vals = {}
 
-for grp_label, icon, off_keys, def_keys, _, _ in EDITOR_GROUPS:
-    if not off_keys and not def_keys:
-        continue
-    with st.expander(f"{icon} **{grp_label}**", expanded=False):
-        col_off, col_def = st.columns(2)
-        with col_off:
-            if off_keys:
-                st.markdown("**Offensive**")
-            for f in off_keys:
-                label, default = OFFENSIVE_FIELDS[f]
-                off_vals[f] = _render_input(f, label, default, f"be_off_{f}")
-        with col_def:
-            if def_keys:
-                st.markdown("**Defensive**")
-            for f in def_keys:
-                label, default = DEFENSIVE_FIELDS[f]
-                def_vals[f] = _render_input(f, label, default, f"be_def_{f}")
+with tab_stats:
+    for grp_label, icon, off_keys, def_keys, _, _ in EDITOR_GROUPS:
+        if not off_keys and not def_keys:
+            continue
+        with st.expander(f"{icon} **{grp_label}**", expanded=False):
+            col_off, col_def = st.columns(2)
+            with col_off:
+                if off_keys:
+                    st.markdown("**Offensive**")
+                for f in off_keys:
+                    label, default = OFFENSIVE_FIELDS[f]
+                    off_vals[f] = _render_input(f, label, default, f"be_off_{f}")
+            with col_def:
+                if def_keys:
+                    st.markdown("**Defensive**")
+                for f in def_keys:
+                    label, default = DEFENSIVE_FIELDS[f]
+                    def_vals[f] = _render_input(f, label, default, f"be_def_{f}")
 
-# Fill in any fields not covered by groups
+# Fill in any fields not covered by groups (runs outside tab so always populated)
 for f, (label, default) in OFFENSIVE_FIELDS.items():
     if f not in off_vals:
         off_vals[f] = st.session_state.get(f"be_off_{f}", default)
@@ -167,11 +175,38 @@ for f, (label, default) in DEFENSIVE_FIELDS.items():
     if f not in def_vals:
         def_vals[f] = st.session_state.get(f"be_def_{f}", default)
 
-# ---------------------------------------------------------------------------
-# Weapon Enchants (metadata for Enchant Optimizer)
-# ---------------------------------------------------------------------------
-with st.expander("⚗️ **Weapon Enchants**", expanded=False):
-    st.caption("Record your current weapon enchants. Used by the Enchant Optimizer to find improvements.")
+# ── Tab 2: Enchants ───────────────────────────────────────────────────────
+with tab_enchants:
+    st.caption("Record your current enchant levels and active enchants. Used by the Enchant Optimizer.")
+
+    # Enchant levels & awakening
+    st.markdown("**Enchant Levels**")
+    col_wlvl, col_alvl, col_aclvl = st.columns(3)
+    with col_wlvl:
+        weapon_enchant_lvl = st.number_input(
+            "Weapon", min_value=0, max_value=20, step=1,
+            key="be_wm_weapon_enchant_lvl",
+            help="Your weapon's current enchant level (0–20).",
+        )
+    with col_alvl:
+        armor_enchant_lvl = st.number_input(
+            "Armor", min_value=0, max_value=20, step=1,
+            key="be_wm_armor_enchant_lvl",
+            help="Your armor's current enchant level (0–20).",
+        )
+    with col_aclvl:
+        accessory_enchant_lvl = st.number_input(
+            "Accessory", min_value=0, max_value=20, step=1,
+            key="be_wm_accessory_enchant_lvl",
+            help="Your accessory's current enchant level (0–20).",
+        )
+
+    max_awakening = get_max_awakening_for_enchant_levels(
+        weapon_enchant_lvl, armor_enchant_lvl, accessory_enchant_lvl
+    )
+    if st.session_state.get("be_wm_awakening", 0) > max_awakening:
+        st.session_state["be_wm_awakening"] = max_awakening
+
     col_wt, col_awk = st.columns(2)
     with col_wt:
         weapon_type = st.radio(
@@ -181,17 +216,22 @@ with st.expander("⚗️ **Weapon Enchants**", expanded=False):
         )
     with col_awk:
         awakening = st.number_input(
-            "Enchant Awakening Level", min_value=0, max_value=MAX_ENCHANT_AWAKENING,
+            "Enchant Awakening Level", min_value=0, max_value=max_awakening,
             step=1, key="be_wm_awakening",
+            help=f"Max awakening based on your enchant levels: {max_awakening}",
         )
 
     awk_info = get_enchant_awakening_info(awakening)
-    st.caption(f"Enchant Level: **{awk_info['enchant_lvl']}**  ·  Modifier: **×{awk_info['modifier']:.1f}**")
+    st.caption(
+        f"Required enchant level for this awakening: **{awk_info['enchant_lvl']}**  ·  "
+        f"Modifier: **×{awk_info['modifier']:.1f}**  ·  "
+        f"Max awakening available: **{max_awakening}**"
+    )
 
     all_stat_names = ["None"] + list(ENCHANT_STAT_FIELD_MAP.keys())
 
     def _enchant_slot_row(prefix: str, i: int, wtype: str) -> dict | None:
-        col_s, col_q = st.columns([3, 2])
+        col_s, col_q, col_c = st.columns([3, 2, 2])
         with col_s:
             stat = st.selectbox(
                 f"Slot {i + 1}", all_stat_names,
@@ -203,14 +243,43 @@ with st.expander("⚗️ **Weapon Enchants**", expanded=False):
                 key=f"{prefix}_{i}_qual", label_visibility="collapsed",
                 disabled=(stat == "None"),
             )
+
+        city = None
         if stat != "None":
-            opts = get_weapon_enchant_options(wtype, awk_info["enchant_lvl"], qual, awk_info["modifier"])
+            cities = get_enchant_cities_for_stat(wtype, stat)
+            with col_c:
+                if len(cities) > 1:
+                    saved = st.session_state.get(f"{prefix}_{i}_city")
+                    cur_city = saved if saved in cities else cities[0]
+                    city = st.selectbox(
+                        "City", cities,
+                        index=cities.index(cur_city),
+                        key=f"{prefix}_{i}_city",
+                        label_visibility="collapsed",
+                    )
+                elif cities:
+                    city = cities[0]
+                    st.session_state[f"{prefix}_{i}_city"] = city
+                    st.caption(city)
+
+            opts = get_weapon_enchant_options(wtype, awk_info["enchant_lvl"], qual, awk_info["modifier"], city=city)
             opt_map = {o["stat_en"]: o for o in opts}
             if stat in opt_map:
                 eff = opt_map[stat]["effective_value"]
                 st.caption(f"+{eff:g}  ({ENCHANT_STAT_LABELS.get(stat, stat)})")
-            return {"stat_en": stat, "quality": qual}
+            return {"stat_en": stat, "quality": qual, "city": city}
         return None
+
+    # Weapon enchants
+    st.divider()
+    st.markdown("**Weapon Enchants**")
+    col_hdr_s, col_hdr_q, col_hdr_c = st.columns([3, 2, 2])
+    with col_hdr_s:
+        st.caption("Stat")
+    with col_hdr_q:
+        st.caption("Quality")
+    with col_hdr_c:
+        st.caption("City")
 
     st.markdown("**Main Weapon**")
     main_enchants = [_enchant_slot_row("be_wm_main", i, weapon_type) for i in range(3)]
@@ -220,13 +289,20 @@ with st.expander("⚗️ **Weapon Enchants**", expanded=False):
         st.markdown("**Sub-Weapon**")
         sub_enchants = [_enchant_slot_row("be_wm_sub", i, "sub") for i in range(3)]
 
-# ---------------------------------------------------------------------------
-# Card Effects
-# ---------------------------------------------------------------------------
-with st.expander("🃏 **Card Effects**", expanded=False):
+    # Armor enchants
+    st.divider()
+    st.markdown("**Armor Enchants**")
+    st.caption("*Work in progress — armor enchant tracking coming soon.*")
+
+    # Accessory enchants
+    st.divider()
+    st.markdown("**Accessory Enchants**")
+    st.caption("*Work in progress — accessory enchant tracking coming soon.*")
+
+# ── Tab 3: Cards ──────────────────────────────────────────────────────────
+with tab_cards:
     drake_card = st.toggle(
         "Drake Card",
-        value=st.session_state.get("be_wm_drake_card", False),
         key="be_wm_drake_card",
         help=(
             "Drake Card: removes the size modifier from damage calculations. "
@@ -235,11 +311,14 @@ with st.expander("🃏 **Card Effects**", expanded=False):
     )
 
 weapon_meta = {
-    "weapon_type":       st.session_state.get("be_wm_weapon_type", "one-handed"),
-    "enchant_awakening": st.session_state.get("be_wm_awakening",   0),
-    "main_enchants":     main_enchants,
-    "sub_enchants":      sub_enchants,
-    "drake_card":        st.session_state.get("be_wm_drake_card",  False),
+    "weapon_type":           st.session_state.get("be_wm_weapon_type",           "one-handed"),
+    "weapon_enchant_lvl":    st.session_state.get("be_wm_weapon_enchant_lvl",    0),
+    "armor_enchant_lvl":     st.session_state.get("be_wm_armor_enchant_lvl",     0),
+    "accessory_enchant_lvl": st.session_state.get("be_wm_accessory_enchant_lvl", 0),
+    "enchant_awakening":     st.session_state.get("be_wm_awakening",             0),
+    "main_enchants":         main_enchants,
+    "sub_enchants":          sub_enchants,
+    "drake_card":            st.session_state.get("be_wm_drake_card",            False),
 }
 
 st.divider()

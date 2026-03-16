@@ -76,6 +76,19 @@ _ENCHANT_AWAKENING_TABLE: dict[int, dict] = {
 MAX_ENCHANT_AWAKENING = max(_ENCHANT_AWAKENING_TABLE.keys(), default=0)
 
 
+def get_max_awakening_for_enchant_levels(weapon_lvl: int, armor_lvl: int, accessory_lvl: int) -> int:
+    """
+    Return the highest enchant awakening level achievable given the three enchant levels.
+    All three must meet the required 'Enchant Lvl' for a given awakening tier.
+    """
+    min_lvl = min(weapon_lvl, armor_lvl, accessory_lvl)
+    max_awk = 0
+    for awk_lvl, info in _ENCHANT_AWAKENING_TABLE.items():
+        if info["enchant_lvl"] <= min_lvl:
+            max_awk = max(max_awk, awk_lvl)
+    return max_awk
+
+
 def get_enchant_awakening_info(awakening_level: int) -> dict:
     """Return {enchant_lvl, modifier} for the given enchant awakening level (0 = none)."""
     if awakening_level <= 0:
@@ -86,17 +99,34 @@ def get_enchant_awakening_info(awakening_level: int) -> dict:
     )
 
 
+def get_enchant_cities_for_stat(weapon_type: str, stat_en: str) -> list[str]:
+    """
+    Return a sorted list of cities that offer stat_en for the given weapon type.
+    Returns a single-element list when only one city carries that enchant.
+    """
+    equip_label = WEAPON_EQUIP_LABEL.get(weapon_type)
+    if equip_label is None:
+        return []
+    mask = (
+        (_ENCHANTS_DF["equipment_en"] == equip_label) &
+        (_ENCHANTS_DF["stat_en"] == stat_en)
+    )
+    return sorted(_ENCHANTS_DF[mask]["location"].dropna().unique().tolist())
+
+
 def get_weapon_enchant_options(
     weapon_type: str,
     enchant_level: int,
     quality: str,
     modifier: float = 1.0,
+    city: str | None = None,
 ) -> list[dict]:
     """
     Return deduplicated list of {stat_en, field, effective_value} for
     damage-relevant weapon enchants at the given level and quality.
-    Where multiple rows exist for the same stat (different cities),
-    the highest base value is used.
+
+    When city is None the highest base value across all cities is used.
+    When city is provided only rows from that city are considered.
 
     weapon_type: "one-handed", "two-handed", or "sub"
     """
@@ -111,6 +141,9 @@ def get_weapon_enchant_options(
         (_ENCHANTS_DF[quality_col].notna()) &
         (_ENCHANTS_DF["stat_en"].isin(ENCHANT_STAT_FIELD_MAP))
     )
+    if city is not None:
+        mask = mask & (_ENCHANTS_DF["location"] == city)
+
     rows = _ENCHANTS_DF[mask]
     if rows.empty:
         return []

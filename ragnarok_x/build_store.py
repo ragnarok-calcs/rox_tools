@@ -31,6 +31,7 @@ from multiplier_stats import (
 # ---------------------------------------------------------------------------
 OFFENSIVE_FIELDS = {
     'patk':                 ('P/MATK',                        1000),
+    'aspd':                 ('ASPD %',                        0),
     'crit_dmg_bonus':       ('Crit DMG Bonus %',               200),
     'pdmg_bonus':           ('P.DMG/M.DMG Bonus',              0),
     'pdmg_bonus_pct':       ('P.DMG/M.DMG Bonus %',            0),
@@ -72,7 +73,7 @@ PCT_FIELDS = {
 }
 
 # Flat (non-pct) integer fields
-INT_FIELDS = {'patk', 'pdmg_bonus', 'pdmg_bonus_pct', 'pdmg_reduc', 'pvp_pdmg_bonus', 'pvp_pdmg_reduc'}
+INT_FIELDS = {'patk', 'aspd', 'pdmg_bonus', 'pdmg_bonus_pct', 'pdmg_reduc', 'pvp_pdmg_bonus', 'pvp_pdmg_reduc'}
 
 # PCT fields that use float input (2 decimal places) instead of integer
 FLOAT_PCT_FIELDS = {
@@ -94,7 +95,7 @@ SELECT_FIELDS = {
 # Grouped layout for the editor: (header, icon, [off_fields], [def_fields], effective_fn_pve, effective_fn_pvp)
 # effective_fn(off_vals_raw, def_vals_raw) -> float
 EDITOR_GROUPS = [
-    ('Base Attack',  '⚔️',  ['patk', 'pdmg_bonus', 'pdmg_bonus_pct'],               ['pdmg_reduc'],               None, None),
+    ('Base Attack',  '⚔️',  ['patk', 'aspd', 'pdmg_bonus', 'pdmg_bonus_pct'],        ['pdmg_reduc'],               None, None),
     ('Crit',         '💥',  ['crit_dmg_bonus'],                                       ['crit_dmg_reduc'],
         lambda o, d: max(o['crit_dmg_bonus'] / 100 - d['crit_dmg_reduc'] / 100, 0.2),
         lambda o, d: max(o['crit_dmg_bonus'] / 100 - d['crit_dmg_reduc'] / 100, 0.2),
@@ -145,11 +146,14 @@ def _def_defaults() -> dict:
 
 def _wm_defaults() -> dict:
     return {
-        "weapon_type":      "one-handed",
-        "enchant_awakening": 0,
-        "main_enchants":    [None, None, None],
-        "sub_enchants":     [None, None, None],
-        "drake_card":       False,
+        "weapon_type":           "one-handed",
+        "weapon_enchant_lvl":    0,
+        "armor_enchant_lvl":     0,
+        "accessory_enchant_lvl": 0,
+        "enchant_awakening":     0,
+        "main_enchants":         [None, None, None],
+        "sub_enchants":          [None, None, None],
+        "drake_card":            False,
     }
 
 
@@ -206,11 +210,14 @@ def get_build_weapon_meta(name: str) -> dict:
     stored = builds[name].get("weapon_meta", {})
     d = _wm_defaults()
     return {
-        "weapon_type":       stored.get("weapon_type",       d["weapon_type"]),
-        "enchant_awakening": stored.get("enchant_awakening", d["enchant_awakening"]),
-        "main_enchants":     stored.get("main_enchants",     d["main_enchants"]),
-        "sub_enchants":      stored.get("sub_enchants",      d["sub_enchants"]),
-        "drake_card":        stored.get("drake_card",        d["drake_card"]),
+        "weapon_type":           stored.get("weapon_type",           d["weapon_type"]),
+        "weapon_enchant_lvl":    stored.get("weapon_enchant_lvl",    d["weapon_enchant_lvl"]),
+        "armor_enchant_lvl":     stored.get("armor_enchant_lvl",     d["armor_enchant_lvl"]),
+        "accessory_enchant_lvl": stored.get("accessory_enchant_lvl", d["accessory_enchant_lvl"]),
+        "enchant_awakening":     stored.get("enchant_awakening",     d["enchant_awakening"]),
+        "main_enchants":         stored.get("main_enchants",         d["main_enchants"]),
+        "sub_enchants":          stored.get("sub_enchants",          d["sub_enchants"]),
+        "drake_card":            stored.get("drake_card",            d["drake_card"]),
     }
 
 
@@ -371,12 +378,14 @@ def render_sidebar():
         st.divider()
         st.sidebar.markdown("**🔧 Tools**")
         st.sidebar.page_link("pages/Enchant_Lookup.py", label="Enchant Lookup")
-        st.sidebar.page_link("pages/Enchant_Optimizer.py", label="Enchant Optimizer")
+        #st.sidebar.page_link("pages/Enchant_Optimizer.py", label="Enchant Optimizer")
         st.divider()
         st.sidebar.markdown("**⚔️ Build Testing**")
         st.sidebar.page_link("pages/Build_Editor.py", label="Build Editor")
+        #st.sidebar.page_link("pages/Rotation_Builder.py", label="Rotation Builder")
         st.sidebar.page_link("pages/DMG_Calculator.py", label=" ⤷ Damage Calculator")
         st.sidebar.page_link("pages/Stat_Optimizer.py", label=" ⤷ Stat Optimizer")
+        #Sst.sidebar.page_link("pages/DPS_Simulator.py", label=" ⤷ DPS Simulator")
 
         st.divider()
         st.header("Upload/Download Builds")
