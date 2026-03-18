@@ -378,13 +378,14 @@ def render_sidebar():
         st.divider()
         st.sidebar.markdown("**🔧 Tools**")
         st.sidebar.page_link("pages/Enchant_Lookup.py", label="Enchant Lookup")
-        #st.sidebar.page_link("pages/Enchant_Optimizer.py", label="Enchant Optimizer")
+
         st.divider()
         st.sidebar.markdown("**⚔️ Build Testing**")
         st.sidebar.page_link("pages/Build_Editor.py", label="Build Editor")
         #st.sidebar.page_link("pages/Rotation_Builder.py", label="Rotation Builder")
         st.sidebar.page_link("pages/DMG_Calculator.py", label=" ⤷ Damage Calculator")
         st.sidebar.page_link("pages/Stat_Optimizer.py", label=" ⤷ Stat Optimizer")
+        st.sidebar.page_link("pages/Enchant_Optimizer.py", label=" ⤷ Enchant Optimizer")
         #Sst.sidebar.page_link("pages/DPS_Simulator.py", label=" ⤷ DPS Simulator")
 
         st.divider()

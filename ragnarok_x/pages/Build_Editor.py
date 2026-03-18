@@ -99,11 +99,14 @@ if _prev_sel != selected:
         st.session_state[f"be_wm_main_{i}_stat"] = slot["stat_en"] if slot else "None"
         st.session_state[f"be_wm_main_{i}_qual"] = slot["quality"] if slot else "Orange"
         st.session_state[f"be_wm_main_{i}_city"] = slot.get("city") if slot else None
+        _default_lvl = int(wm.get("weapon_enchant_lvl") or 1)
+        st.session_state[f"be_wm_main_{i}_lvl"]  = int(slot.get("level", _default_lvl)) if slot else _default_lvl
         enc = (wm["sub_enchants"] or [None, None, None])
         slot = enc[i] if i < len(enc) else None
         st.session_state[f"be_wm_sub_{i}_stat"] = slot["stat_en"] if slot else "None"
         st.session_state[f"be_wm_sub_{i}_qual"] = slot["quality"] if slot else "Orange"
         st.session_state[f"be_wm_sub_{i}_city"] = slot.get("city") if slot else None
+        st.session_state[f"be_wm_sub_{i}_lvl"]  = int(slot.get("level", _default_lvl)) if slot else _default_lvl
 
 # ---------------------------------------------------------------------------
 # Build name input
@@ -231,11 +234,17 @@ with tab_enchants:
     all_stat_names = ["None"] + list(ENCHANT_STAT_FIELD_MAP.keys())
 
     def _enchant_slot_row(prefix: str, i: int, wtype: str) -> dict | None:
-        col_s, col_q, col_c = st.columns([3, 2, 2])
+        col_s, col_l, col_q, col_c = st.columns([3, 1, 2, 2])
         with col_s:
             stat = st.selectbox(
                 f"Slot {i + 1}", all_stat_names,
                 key=f"{prefix}_{i}_stat", label_visibility="collapsed",
+            )
+        with col_l:
+            lvl = st.number_input(
+                "Level", min_value=1, max_value=20, step=1,
+                key=f"{prefix}_{i}_lvl", label_visibility="collapsed",
+                disabled=(stat == "None"),
             )
         with col_q:
             qual = st.selectbox(
@@ -262,20 +271,31 @@ with tab_enchants:
                     st.session_state[f"{prefix}_{i}_city"] = city
                     st.caption(city)
 
-            opts = get_weapon_enchant_options(wtype, awk_info["enchant_lvl"], qual, awk_info["modifier"], city=city)
+            opts = get_weapon_enchant_options(wtype, lvl, qual, awk_info["modifier"], city=city)
             opt_map = {o["stat_en"]: o for o in opts}
             if stat in opt_map:
+                raw = opt_map[stat]["raw_value"]
                 eff = opt_map[stat]["effective_value"]
-                st.caption(f"+{eff:g}  ({ENCHANT_STAT_LABELS.get(stat, stat)})")
-            return {"stat_en": stat, "quality": qual, "city": city}
+                modifier = awk_info["modifier"]
+                if modifier > 1.0:
+                    bonus = round(eff - raw, 4)
+                    st.caption(
+                        f"+{raw:g} base  +  +{bonus:g} awakening  =  **+{eff:g}**  "
+                        f"({ENCHANT_STAT_LABELS.get(stat, stat)})"
+                    )
+                else:
+                    st.caption(f"+{eff:g}  ({ENCHANT_STAT_LABELS.get(stat, stat)})")
+            return {"stat_en": stat, "quality": qual, "city": city, "level": lvl}
         return None
 
     # Weapon enchants
     st.divider()
     st.markdown("**Weapon Enchants**")
-    col_hdr_s, col_hdr_q, col_hdr_c = st.columns([3, 2, 2])
+    col_hdr_s, col_hdr_l, col_hdr_q, col_hdr_c = st.columns([3, 1, 2, 2])
     with col_hdr_s:
         st.caption("Stat")
+    with col_hdr_l:
+        st.caption("Lvl")
     with col_hdr_q:
         st.caption("Quality")
     with col_hdr_c:
