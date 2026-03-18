@@ -66,7 +66,7 @@ PCT_FIELDS = {
     'crit_dmg_bonus', 'final_pdmg_bonus', 'weapon_size_modifier', 'size_enhance',
     'elemental_counter', 'element_enhance', 'bonus_dmg_element',
     'bonus_dmg_race', 'final_dmg_bonus', 'pvp_final_pdmg_bonus',
-    'total_final_pen',
+    'total_final_pen', 'pdmg_bonus_pct',
     'crit_dmg_reduc', 'final_pdmg_reduc', 'element_resist', 'size_reduc',
     'race_reduc', 'final_dmg_reduc', 'pvp_final_pdmg_reduc',
     'total_final_def',
