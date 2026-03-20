@@ -13,7 +13,7 @@ import streamlit as st
 
 from build_store import (
     OFFENSIVE_FIELDS, DEFENSIVE_FIELDS,
-    PCT_FIELDS, SELECT_FIELDS, EDITOR_GROUPS,
+    PCT_FIELDS, SCENARIO_SELECT_FIELDS, EDITOR_GROUPS,
     init_store, get_builds,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
     apply_card_effects, get_weights, render_sidebar,
@@ -57,6 +57,21 @@ with col_atk:
 
 _is_skill = atk_type == "Skill Attack"
 _is_hybrid = dmg_type == "Hybrid"
+col_size, col_elem, _ = st.columns([1, 2, 3])
+with col_size:
+    weapon_size_modifier = st.selectbox(
+        "Weapon Size", options=SCENARIO_SELECT_FIELDS['weapon_size_modifier'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['weapon_size_modifier'].index(100),
+        key="so_weapon_size_modifier",
+    )
+with col_elem:
+    elemental_counter = st.selectbox(
+        "Elemental Counter", options=SCENARIO_SELECT_FIELDS['elemental_counter'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['elemental_counter'].index(100),
+        key="so_elemental_counter",
+    )
 col_pmatk, col_hits, col_hybrid = st.columns([1, 1, 2])
 with col_pmatk:
     pmatk_pct = st.number_input(
@@ -109,6 +124,8 @@ attack_mult    = 16 if _is_skill else 8
 _pmatk         = pmatk_pct if _is_skill else 100
 
 base_off_raw = dict(get_build_offensive(sel_off))
+base_off_raw['weapon_size_modifier'] = weapon_size_modifier
+base_off_raw['elemental_counter']    = elemental_counter
 wm = get_build_weapon_meta(sel_off)
 
 def_raws = {name: get_build_defensive(name) for name in sel_def}
@@ -139,7 +156,7 @@ for def_name in sel_def:
     if _drake_active and mode == "PVE":
         w.pop('weapon_size_modifier', None)
         w.pop('size_enhance', None)
-    all_weights[def_name] = {k: v for k, v in w.items() if k not in SELECT_FIELDS}
+    all_weights[def_name] = {k: v for k, v in w.items() if k not in SCENARIO_SELECT_FIELDS}
 
 # ---------------------------------------------------------------------------
 # Effective multipliers per group

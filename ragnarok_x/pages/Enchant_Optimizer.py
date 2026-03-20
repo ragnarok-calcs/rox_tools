@@ -17,7 +17,7 @@ import streamlit as st
 
 from build_store import (
     OFFENSIVE_FIELDS,
-    SELECT_FIELDS,
+    SCENARIO_SELECT_FIELDS,
     init_store, get_builds,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
     calculate, render_sidebar,
@@ -60,6 +60,21 @@ with col_atk:
     )
 
 _is_skill = atk_type == "Skill Attack"
+col_size, col_elem, _ = st.columns([1, 2, 3])
+with col_size:
+    weapon_size_modifier = st.selectbox(
+        "Weapon Size", options=SCENARIO_SELECT_FIELDS['weapon_size_modifier'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['weapon_size_modifier'].index(100),
+        key="eo_weapon_size_modifier",
+    )
+with col_elem:
+    elemental_counter = st.selectbox(
+        "Elemental Counter", options=SCENARIO_SELECT_FIELDS['elemental_counter'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['elemental_counter'].index(100),
+        key="eo_elemental_counter",
+    )
 col_pmatk, col_hits, _ = st.columns([1, 1, 4])
 with col_pmatk:
     pmatk_pct = st.number_input(
@@ -140,6 +155,8 @@ _pmatk         = pmatk_pct if _is_skill else 100
 _hits          = num_hits  if _is_skill else 1
 
 off_raw_base = dict(get_build_offensive(sel_off))
+off_raw_base['weapon_size_modifier'] = weapon_size_modifier
+off_raw_base['elemental_counter']    = elemental_counter
 off_raw_base["patk"] = off_raw_base["patk"] * _pmatk / 100
 def_raws = {name: get_build_defensive(name) for name in sel_def}
 
@@ -285,6 +302,7 @@ _cache_key = (
     sel_off, tuple(sorted(sel_def)),
     mode, dmg_type, atk_type, pmatk_pct, num_hits, quality,
     weapon_type, weapon_enchant_lvl, awakening,
+    weapon_size_modifier, elemental_counter,
 )
 if st.session_state.get("eo_results_key") != _cache_key:
     st.session_state.pop("eo_results", None)

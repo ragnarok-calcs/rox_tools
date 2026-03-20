@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import streamlit as st
 from build_store import (
     OFFENSIVE_FIELDS, DEFENSIVE_FIELDS,
-    PCT_FIELDS, INT_FIELDS, SELECT_FIELDS, FLOAT_PCT_FIELDS,
+    PCT_FIELDS, INT_FIELDS, FLOAT_PCT_FIELDS, SCENARIO_SELECT_FIELDS,
     EDITOR_GROUPS,
     init_store, get_builds, save_build, delete_build,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
@@ -63,7 +63,7 @@ if _prev_sel != selected:
     st.session_state["_be_prev_sel"] = selected
     st.session_state["be_name"] = "" if is_new else selected
     def _coerce(f, val):
-        if f in SELECT_FIELDS:
+        if f in SCENARIO_SELECT_FIELDS:
             return int(val)
         if f in FLOAT_PCT_FIELDS:
             return float(val)
@@ -120,18 +120,8 @@ st.divider()
 # ---------------------------------------------------------------------------
 # Input renderer
 # ---------------------------------------------------------------------------
-#TODO: Move the Weapon Size Modifier % and Elemental Counter % from the Build Editor
-#      to the DMG Calculator and Stat Optimizer pages. These stats are not universal,
-#      but change depending on the damage calculation and aren't tied to the character.
-#      Moving to the damage calculation pages is better aligned with game behavior
 def _render_input(field: str, label: str, default, key: str):
-    if field in SELECT_FIELDS:
-        options = SELECT_FIELDS[field]
-        cur = st.session_state.get(key, int(default))
-        idx = options.index(cur) if cur in options else 0
-        return st.selectbox(label, options=options, index=idx,
-                            format_func=lambda x: f"{x}%", key=key)
-    elif field in FLOAT_PCT_FIELDS:
+    if field in FLOAT_PCT_FIELDS:
         return st.number_input(label, value=float(st.session_state.get(key, default)),
                                min_value=0.0, step=0.01, format="%.2f", key=key)
     elif field in PCT_FIELDS or field in INT_FIELDS:
@@ -161,6 +151,8 @@ with tab_stats:
                 if off_keys:
                     st.markdown("**Offensive**")
                 for f in off_keys:
+                    if f in SCENARIO_SELECT_FIELDS:
+                        continue
                     label, default = OFFENSIVE_FIELDS[f]
                     off_vals[f] = _render_input(f, label, default, f"be_off_{f}")
             with col_def:
@@ -353,7 +345,11 @@ with col_save:
         if not name:
             st.error("Enter a build name.")
         else:
-            save_build(name, off_vals, def_vals, weapon_meta)
+            try:
+                save_build(name, off_vals, def_vals, weapon_meta)
+            except ValueError as exc:
+                st.error(str(exc))
+                st.stop()
             st.session_state["_bs_file_loaded"] = True
             if is_new:
                 # Force stat reset to defaults on rerun so the form is clean

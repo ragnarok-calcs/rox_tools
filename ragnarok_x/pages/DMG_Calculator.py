@@ -13,7 +13,7 @@ import streamlit as st
 
 from build_store import (
     OFFENSIVE_FIELDS,
-    PCT_FIELDS, SELECT_FIELDS,
+    PCT_FIELDS, SCENARIO_SELECT_FIELDS,
     init_store, get_builds,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
     apply_card_effects, calculate, render_sidebar,
@@ -57,6 +57,21 @@ with col_atk:
     )
 
 _is_skill = atk_type == "Skill Attack"
+col_size, col_elem, _ = st.columns([1, 2, 3])
+with col_size:
+    weapon_size_modifier = st.selectbox(
+        "Weapon Size", options=SCENARIO_SELECT_FIELDS['weapon_size_modifier'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['weapon_size_modifier'].index(100),
+        key="dc_weapon_size_modifier",
+    )
+with col_elem:
+    elemental_counter = st.selectbox(
+        "Elemental Counter", options=SCENARIO_SELECT_FIELDS['elemental_counter'],
+        format_func=lambda x: f"{x}%",
+        index=SCENARIO_SELECT_FIELDS['elemental_counter'].index(100),
+        key="dc_elemental_counter",
+    )
 col_pmatk, col_hits, _ = st.columns([1, 1, 4])
 with col_pmatk:
     pmatk_pct = st.number_input(
@@ -106,6 +121,8 @@ _hits          = num_hits if _is_skill else 1
 results: dict[str, dict[str, float]] = {}
 for off_name in sel_off:
     base_off_raw = dict(get_build_offensive(off_name))
+    base_off_raw['weapon_size_modifier'] = weapon_size_modifier
+    base_off_raw['elemental_counter']    = elemental_counter
     wm = get_build_weapon_meta(off_name)
     results[off_name] = {}
     for def_name in sel_def:

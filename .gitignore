@@ -204,3 +204,6 @@ _scratch.ipynb
 
 # Claude
 .claude/
+
+# Streamlit secrets (contains DB credentials and OAuth secrets)
+**/secrets.toml

@@ -17,8 +17,19 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
+import hashlib
 import json
+import uuid
 import streamlit as st
+
+from db import load_builds_for_user, save_builds_for_user, fetch_builds_by_ids
+
+# ---------------------------------------------------------------------------
+# Security / validation constants
+# ---------------------------------------------------------------------------
+_MAX_NAME_LEN = 64   # characters
+_MAX_BUILDS   = 50   # per user
+_MAX_UUID_IMPORT = 50  # UUIDs accepted in a single import_builds_by_uuid call
 
 from multiplier_stats import (
     PVEPlayerStats, PVETargetStats, pve_calculate_multiplier, pve_modifier_weights,
@@ -86,8 +97,8 @@ FLOAT_PCT_FIELDS = {
     'pvp_final_pdmg_bonus', 'pvp_final_pdmg_reduc',
 }
 
-# Selectbox fields: {field: [option_ints]}
-SELECT_FIELDS = {
+# Scenario-level selectbox fields (not stored in build; set per-calculation in calculator pages)
+SCENARIO_SELECT_FIELDS = {
     'weapon_size_modifier': [75, 100],
     'elemental_counter':    [0, 25, 50, 70, 75, 90, 100, 125, 150, 175],
 }
@@ -158,11 +169,107 @@ def _wm_defaults() -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Validation / sanitization helpers
+# ---------------------------------------------------------------------------
+def _validate_build_name(name: str) -> str | None:
+    """Return an error string if the name is invalid, else None."""
+    name = name.strip()
+    if not name:
+        return "Build name cannot be empty."
+    if len(name) > _MAX_NAME_LEN:
+        return f"Build name must be {_MAX_NAME_LEN} characters or fewer (got {len(name)})."
+    if name.startswith("$"):
+        return "Build name cannot start with '$'."
+    if "." in name:
+        return "Build name cannot contain '.'."
+    return None
+
+
+def _sanitize_weapon_meta(raw: dict) -> dict:
+    """Return a weapon_meta copy containing only known keys (whitelist filter)."""
+    defaults = _wm_defaults()
+    return {k: raw.get(k, defaults[k]) for k in defaults}
+
+
+def _sanitize_canonical_name(name: str) -> str:
+    """
+    Sanitize a canonical_name sourced from the DB (written by a third party)
+    so it is safe to use as a local build name / widget key.
+    Never raises — always returns a non-empty string.
+    """
+    name = (name or "").strip()
+    name = name.lstrip("$")          # strip leading $ operators
+    name = name.replace(".", "_")    # dots are problematic as MongoDB field keys
+    name = name[:_MAX_NAME_LEN]
+    return name or "Imported Build"
+
+
+# ---------------------------------------------------------------------------
+# Auth helpers
+# ---------------------------------------------------------------------------
+def _current_user_email() -> str | None:
+    """
+    Return the authenticated user's email, or None if not logged in.
+    Local dev bypass: if no [auth] section exists in secrets, returns
+    'dev@localhost' so the DB path works without real OAuth.
+    Uses st.user (Streamlit 1.41+); is_logged_in is only present when
+    auth is configured.
+    """
+    if not st.secrets.get("auth"):
+        return "dev@localhost"
+    try:
+        if not st.user.is_logged_in:
+            return None
+        return st.user.get("email")
+    except Exception:
+        return None
+
+
+def _user_key() -> str | None:
+    """
+    Return a one-way SHA-256 hash of the user's email for use as the DB key.
+    The raw email is never stored in MongoDB — only this hash is used there.
+    The same email always produces the same hash, so lookups remain consistent.
+    """
+    email = _current_user_email()
+    if email is None:
+        return None
+    return hashlib.sha256(email.lower().encode()).hexdigest()
+
+
+def _sync_to_db() -> None:
+    """Write the current session builds to MongoDB. Silently toasts on failure."""
+    key = _user_key()
+    if key:
+        try:
+            save_builds_for_user(key, st.session_state["builds"])
+        except Exception as e:
+            st.toast(f"⚠️ DB sync failed: {e}")
+
+
+# ---------------------------------------------------------------------------
 # Session-state store helpers
 # ---------------------------------------------------------------------------
 def init_store():
-    """Initialise the builds store if not already present."""
-    if "builds" not in st.session_state:
+    """
+    Initialise the builds store.
+    On the first call per session, ensures DB indexes exist then loads builds
+    from MongoDB for the logged-in user. Subsequent calls are no-ops.
+    """
+    if "builds" in st.session_state:
+        return
+    from db import ensure_indexes
+    try:
+        ensure_indexes()
+    except Exception:
+        pass
+    key = _user_key()
+    if key:
+        try:
+            st.session_state["builds"] = load_builds_for_user(key)
+        except Exception:
+            st.session_state["builds"] = {}
+    else:
         st.session_state["builds"] = {}
 
 
@@ -173,18 +280,27 @@ def get_builds() -> dict:
 
 def save_build(name: str, offensive: dict, defensive: dict, weapon_meta: dict | None = None):
     init_store()
+    err = _validate_build_name(name)
+    if err:
+        raise ValueError(err)
+    existing = st.session_state["builds"].get(name, {})
+    if name not in st.session_state["builds"] and len(st.session_state["builds"]) >= _MAX_BUILDS:
+        raise ValueError(f"Build limit ({_MAX_BUILDS}) reached — delete a build before saving a new one.")
     entry: dict = {
+        "build_id":  existing.get("build_id") or str(uuid.uuid4()),
         "offensive": dict(offensive),
         "defensive": dict(defensive),
     }
     if weapon_meta is not None:
         entry["weapon_meta"] = dict(weapon_meta)
     st.session_state["builds"][name] = entry
+    _sync_to_db()
 
 
 def delete_build(name: str):
     init_store()
     st.session_state["builds"].pop(name, None)
+    _sync_to_db()
 
 
 def get_build_offensive(name: str) -> dict:
@@ -240,6 +356,11 @@ def import_builds_data(data: dict):
     n = 0
     if "builds" in data:
         for name, b in data["builds"].items():
+            err = _validate_build_name(name)
+            if err:
+                return 0, f"Invalid build name {name!r}: {err}"
+            if len(st.session_state["builds"]) >= _MAX_BUILDS:
+                return n, f"Build limit ({_MAX_BUILDS}) reached — import stopped."
             off = b.get("offensive", b.get("stats", {}))
             defn = b.get("defensive", {})
             entry = {
@@ -247,7 +368,7 @@ def import_builds_data(data: dict):
                 "defensive": {f: defn.get(f, default) for f, (_, default) in DEFENSIVE_FIELDS.items()},
             }
             if "weapon_meta" in b:
-                entry["weapon_meta"] = b["weapon_meta"]
+                entry["weapon_meta"] = _sanitize_weapon_meta(b["weapon_meta"])
             st.session_state["builds"][name] = entry
             n += 1
     elif "player_builds" in data or "target_builds" in data:
@@ -270,7 +391,62 @@ def import_builds_data(data: dict):
             n += 1
     else:
         return 0, "Unrecognised file format."
+    _sync_to_db()
     return n, None
+
+
+def import_builds_by_uuid(raw_input: str) -> tuple[int, list]:
+    """
+    Parse one UUID per line from raw_input, fetch from the global builds
+    collection, and merge into session state.
+    Returns (n_imported, list_of_error_strings).
+    """
+    init_store()
+    lines = [l.strip() for l in raw_input.splitlines() if l.strip()]
+    if len(lines) > _MAX_UUID_IMPORT:
+        return 0, [f"Too many UUIDs — limit is {_MAX_UUID_IMPORT} per import."]
+    errors: list = []
+    valid_ids: list = []
+    for line in lines:
+        try:
+            uuid.UUID(line)
+            valid_ids.append(line)
+        except ValueError:
+            errors.append(f"Invalid UUID: {line!r}")
+
+    if not valid_ids:
+        return 0, errors or ["No UUIDs entered."]
+
+    fetched = fetch_builds_by_ids(valid_ids)
+    for bid in valid_ids:
+        if bid not in fetched:
+            errors.append(f"Build not found: {bid}")
+
+    n = 0
+    existing_names = set(st.session_state["builds"])
+    for bid, doc in fetched.items():
+        if len(st.session_state["builds"]) >= _MAX_BUILDS:
+            errors.append(f"Build limit ({_MAX_BUILDS}) reached — import stopped.")
+            break
+        base = _sanitize_canonical_name(doc.get("canonical_name", bid[:8]))
+        name, i = base, 2
+        while name in existing_names:
+            name = f"{base} ({i})"
+            i += 1
+        off = doc.get("offensive", {})
+        defn = doc.get("defensive", {})
+        st.session_state["builds"][name] = {
+            "build_id":    bid,
+            "offensive":   {f: off.get(f, default)  for f, (_, default) in OFFENSIVE_FIELDS.items()},
+            "defensive":   {f: defn.get(f, default) for f, (_, default) in DEFENSIVE_FIELDS.items()},
+            "weapon_meta": doc.get("weapon_meta", _wm_defaults()),
+        }
+        existing_names.add(name)
+        n += 1
+
+    if n:
+        _sync_to_db()
+    return n, errors
 
 
 # ---------------------------------------------------------------------------
@@ -370,10 +546,36 @@ def get_weights(mode: str, off_raw: dict, def_raw: dict,
 def render_sidebar():
     """
     Render the shared build manager in the sidebar.
-    Pages call this once; it handles upload / export / list.
+    Pages call this once; it handles auth gate, upload / export / list.
     """
+    # ── Auth gate ─────────────────────────────────────────────────────────
+    email = _current_user_email()
+    if email is None:
+        with st.sidebar:
+            if st.button("Log in with Google", key="sb_login", use_container_width=True):
+                st.login("google")
+        st.title("Ragnarok X Tools")
+        st.info("Please log in to access your builds.")
+        st.stop()
+
     init_store()
+    if not st.secrets.get("auth"):
+        st.warning(
+            "⚠️ **Dev bypass active** — no `[auth]` section found in secrets. "
+            "All users share the same `dev@localhost` account. "
+            "Configure `[auth]` in `.streamlit/secrets.toml` before deploying.",
+            icon="🔓",
+        )
     with st.sidebar:
+        try:
+            display_email = st.user.get("email") if st.secrets.get("auth") else "dev@localhost"
+        except Exception:
+            display_email = email  # fall back to what _current_user_email() already resolved
+        st.caption(f"👤 {display_email}")
+        if st.secrets.get("auth") and st.button("Log out", key="sb_logout", use_container_width=True, type="tertiary"):
+            st.session_state.pop("builds", None)
+            st.logout()
+
         st.sidebar.page_link("app.py", label="Home", icon="🏠")
         st.divider()
         st.sidebar.markdown("**🔧 Tools**")
@@ -389,86 +591,132 @@ def render_sidebar():
         #Sst.sidebar.page_link("pages/DPS_Simulator.py", label=" ⤷ DPS Simulator")
 
         st.divider()
-        st.header("Upload/Download Builds")
-        # ── File uploader (hidden once a file has been loaded) ────────────
-        if not st.session_state.get("_bs_file_loaded"):
-            uploaded_files = st.file_uploader(
-                "Load builds from JSON", type=["json"],
-                key="bs_uploader", accept_multiple_files=True,
-            )
-            if uploaded_files:
-                last_name = ""
-                for uf in uploaded_files:
-                    file_id = f"_bs_loaded_{id(uf)}_{uf.name}"
-                    if st.session_state.get(file_id):
-                        continue
-                    st.session_state[file_id] = True
-                    try:
-                        data = json.load(uf)
-                        n, err = import_builds_data(data)
-                        if err:
-                            st.toast(f"{uf.name}: {err}", icon="❌")
-                        else:
-                            st.toast(f"{uf.name}: loaded {n} build(s).", icon="✅")
-                            last_name = uf.name
-                    except Exception as e:
-                        st.toast(f"{uf.name}: {e}", icon="❌")
-                if last_name:
-                    st.session_state["_bs_file_loaded"] = True
-                    st.session_state["_bs_loaded_filename"] = last_name
-                    st.rerun()
-        else:
-            loaded_name = st.session_state.get("_bs_loaded_filename", "builds")
-            col_fn, col_clr = st.columns([5, 2], vertical_alignment="center")
-            with col_fn:
-                st.caption(f"📄 {loaded_name}")
-            with col_clr:
-                if st.button(":red[✕]", key="bs_clear_file", width="content", type="tertiary",
-                             help="Remove the loaded file and clear all builds"):
-                    for key in list(st.session_state.keys()):
-                        if key.startswith("_bs_loaded_") or key in ("_bs_file_loaded", "bs_uploader"):
-                            st.session_state.pop(key, None)
-                    st.session_state["builds"] = {}
-                    st.rerun()
+        st.header("Builds")
 
-        builds = get_builds()
-        if builds:
-            st.download_button(
-                f"⬇ Export builds ({len(builds)})",
-                data=export_builds_json(),
-                file_name="rag_builds.json",
-                mime="application/json",
-                use_container_width=True,
-                key="bs_download",
+        # ── Compact styling for build list rows ───────────────────────────
+        st.markdown(
+            """<style>
+            /* Build name buttons: compact secondary style */
+            section[data-testid="stSidebar"] button[kind="secondary"] {
+                padding-top: 0.2rem !important;
+                padding-bottom: 0.2rem !important;
+                min-height: 1.75rem !important;
+                font-size: 0.85rem !important;
+            }
+            /* Icon buttons (copy / delete): minimal, no extra space */
+            section[data-testid="stSidebar"] button[kind="tertiary"] {
+                padding-top: 0.15rem !important;
+                padding-bottom: 0.15rem !important;
+                min-height: 1.6rem !important;
+            }
+            </style>""",
+            unsafe_allow_html=True,
+        )
+
+        # ── Import by ID (popover) ─────────────────────────────────────────
+        with st.popover("⬇ Import Build", use_container_width=True):
+            st.caption("Paste one or more build IDs, one per line:")
+            uuid_input = st.text_area(
+                "Build IDs", key="bs_uuid_input",
+                label_visibility="collapsed", height=100,
+                placeholder="e.g. 3f2a1b4c-…",
             )
+            if st.button("Import", use_container_width=True, key="bs_import_uuid", type="primary"):
+                if uuid_input.strip():
+                    n, errors = import_builds_by_uuid(uuid_input)
+                    for e in errors:
+                        st.toast(e, icon="❌")
+                    if n:
+                        st.toast(f"Imported {n} build(s).", icon="✅")
+                        st.rerun()
+                else:
+                    st.toast("Paste at least one build ID.", icon="⚠️")
 
         st.divider()
 
         # ── Build list ────────────────────────────────────────────────────
+        builds = get_builds()
         if builds:
             for bname in list(builds.keys()):
-                col_n, col_edit, col_del = st.columns([5, 1, 1], vertical_alignment="center")
-                with col_n:
-                    st.markdown(bname)
-                with col_edit:
-                    if st.button("✏️", key=f"bs_edit_{bname}", help=f"Edit {bname}",
-                                 width="content", type="tertiary"):
+                # Use build_id (UUID fragment) as widget key — safe regardless of build name content
+                _bid = builds[bname].get("build_id", "")
+                _ksuf = _bid[:8] if _bid else str(abs(hash(bname)) % 10**8)
+                col_name, col_copy, col_del = st.columns([6, 1, 1], vertical_alignment="center")
+                with col_name:
+                    if st.button(bname, key=f"bs_nav_{_ksuf}", use_container_width=True,
+                                 type="secondary", help="Open in Build Editor"):
                         st.session_state["bs_editing"] = bname
                         st.switch_page("pages/Build_Editor.py")
+                with col_copy:
+                    if st.button(" ", key=f"bs_copy_{_ksuf}", type="tertiary",
+                                 icon=":material/content_copy:",
+                                 help="Copy build ID to clipboard"):
+                        st.session_state["_bs_copy_id"] = builds[bname].get("build_id", "")
                 with col_del:
-                    if st.button("🗑️", key=f"bs_del_{bname}", width="content", type="tertiary"):
+                    if st.button(" ", key=f"bs_del_{_ksuf}", type="tertiary",
+                                 icon=":material/delete:",
+                                 help=f"Delete {bname}"):
                         delete_build(bname)
                         st.rerun()
-            if st.button("＋ New Build", use_container_width=True, key="bs_new"):
-                st.session_state.pop("bs_editing", None)
-                st.session_state["be_selected"] = "— New Build —"
-                st.session_state.pop("_be_prev_sel", None)
-                st.switch_page("pages/Build_Editor.py")
 
-            if st.button("🗑 Clear all builds", use_container_width=True, key="bs_clear_all",
-                         help="Delete all saved builds from this session"):
-                st.session_state["builds"] = {}
-                st.rerun()
+            # ── Bottom action row ─────────────────────────────────────────
+            col_new, col_copy_all = st.columns([9, 1])
+            with col_new:
+                if st.button("＋ New Build", use_container_width=True, key="bs_new"):
+                    st.session_state.pop("bs_editing", None)
+                    st.session_state["be_selected"] = "— New Build —"
+                    st.session_state.pop("_be_prev_sel", None)
+                    st.switch_page("pages/Build_Editor.py")
+            with col_copy_all:
+                if st.button(" ", key="bs_copy_all", type="tertiary",
+                             icon=":material/content_copy:",
+                             help="Copy all build IDs to clipboard"):
+                    all_ids = "\n".join(
+                        b.get("build_id", "") for b in builds.values() if b.get("build_id")
+                    )
+                    st.session_state["_bs_copy_id"] = all_ids
+
+            # ── Clipboard copy ────────────────────────────────────────────
+            # Placed after ALL buttons that can set _bs_copy_id so that
+            # both single-copy and copy-all resolve in one rerun.
+            # Always rendered (height=0) so the iframe is a stable DOM
+            # node and the New Build button never shifts position.
+            # A millisecond nonce makes the HTML unique each time there is
+            # content to copy, forcing Streamlit to re-execute the script
+            # even for repeated copies of the same build.
+            import json as _json
+            import time as _time
+            import streamlit.components.v1 as _stc
+            _copy_val = st.session_state.pop("_bs_copy_id", None)
+            _copy_js  = _json.dumps(_copy_val or "")
+            _is_all   = bool(_copy_val and "\n" in _copy_val)
+            _nonce    = int(_time.time() * 1000) if _copy_val else 0
+            _stc.html(
+                f"""<script>
+                /* {_nonce} */
+                (async () => {{
+                    var text = {_copy_js};
+                    if (!text) return;
+                    try {{
+                        await window.parent.navigator.clipboard.writeText(text);
+                    }} catch (_) {{
+                        var inp = window.parent.document.createElement("textarea");
+                        inp.value = text;
+                        inp.style.cssText = "position:fixed;opacity:0";
+                        window.parent.document.body.appendChild(inp);
+                        inp.focus(); inp.select();
+                        window.parent.document.execCommand("copy");
+                        window.parent.document.body.removeChild(inp);
+                    }}
+                }})();
+                </script>""",
+                height=0,
+            )
+            if _copy_val:
+                if _is_all:
+                    st.toast(f"All {len(builds)} build IDs copied!", icon=":material/content_copy:")
+                else:
+                    st.toast("Build ID copied to clipboard!", icon=":material/content_copy:")
         else:
             st.caption("No builds saved yet.")
 
