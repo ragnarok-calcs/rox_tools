@@ -14576,7 +14576,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.4,
     "blue": 0.5,
@@ -14618,7 +14618,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 0.6,
     "blue": 0.75,
@@ -14660,7 +14660,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 0.8,
     "blue": 1,
@@ -14702,7 +14702,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 1,
     "blue": 1.25,
@@ -14744,7 +14744,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 1.2,
     "blue": 1.5,
@@ -14786,7 +14786,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 1.6,
     "blue": 2,
@@ -14828,7 +14828,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 2,
     "blue": 2.5,
@@ -14870,7 +14870,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 2.4,
     "blue": 3,
@@ -14912,7 +14912,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 2.8,
     "blue": 3.5,
@@ -14954,7 +14954,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 3.2,
     "blue": 4,
@@ -14996,7 +14996,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 3.6,
     "blue": 4.5,
@@ -15038,7 +15038,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 4,
     "blue": 5,
@@ -15080,7 +15080,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 4.6,
     "blue": 5.75,
@@ -15122,7 +15122,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 5.2,
     "blue": 6.5,
@@ -15164,7 +15164,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 6,
     "blue": 7.5,
@@ -15206,7 +15206,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 6.8,
     "blue": 8.5,
@@ -15248,7 +15248,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 7.6,
     "blue": 9.5,
@@ -15290,7 +15290,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 8.4,
     "blue": 10.5,
@@ -15332,7 +15332,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 9.2,
     "blue": 11.5,
@@ -15374,7 +15374,7 @@
   {
     "location": "Morocc",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 10,
     "blue": 12.5,
@@ -15976,7 +15976,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.6,
     "blue": 0.75,
@@ -16018,7 +16018,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 0.9,
     "blue": 1.13,
@@ -16060,7 +16060,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 1.2,
     "blue": 1.5,
@@ -16102,7 +16102,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 1.5,
     "blue": 1.88,
@@ -16144,7 +16144,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 1.8,
     "blue": 2.25,
@@ -16186,7 +16186,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 2.4,
     "blue": 3,
@@ -16228,7 +16228,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 3,
     "blue": 3.75,
@@ -16270,7 +16270,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 3.6,
     "blue": 4.5,
@@ -16312,7 +16312,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 4.2,
     "blue": 5.25,
@@ -16354,7 +16354,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 4.8,
     "blue": 6,
@@ -16396,7 +16396,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 5.4,
     "blue": 6.75,
@@ -16438,7 +16438,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 6,
     "blue": 7.5,
@@ -16480,7 +16480,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 6.9,
     "blue": 8.63,
@@ -16522,7 +16522,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 7.8,
     "blue": 9.75,
@@ -16564,7 +16564,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 9,
     "blue": 11.25,
@@ -16606,7 +16606,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 10.2,
     "blue": 12.75,
@@ -16648,7 +16648,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 11.4,
     "blue": 14.25,
@@ -16690,7 +16690,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 12.6,
     "blue": 15.75,
@@ -16732,7 +16732,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 13.8,
     "blue": 17.25,
@@ -16774,7 +16774,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 15,
     "blue": 18.75,
@@ -17376,7 +17376,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.2,
     "blue": 0.25,
@@ -17418,7 +17418,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 0.3,
     "blue": 0.38,
@@ -17460,7 +17460,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 0.4,
     "blue": 0.5,
@@ -17502,7 +17502,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 0.5,
     "blue": 0.63,
@@ -17544,7 +17544,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 0.6,
     "blue": 0.75,
@@ -17586,7 +17586,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 0.8,
     "blue": 1,
@@ -17628,7 +17628,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 1,
     "blue": 1.25,
@@ -17670,7 +17670,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 1.2,
     "blue": 1.5,
@@ -17712,7 +17712,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 1.4,
     "blue": 1.75,
@@ -17754,7 +17754,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 1.6,
     "blue": 2,
@@ -17796,7 +17796,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 1.8,
     "blue": 2.25,
@@ -17838,7 +17838,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 2,
     "blue": 2.5,
@@ -17880,7 +17880,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 2.3,
     "blue": 2.88,
@@ -17922,7 +17922,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 2.6,
     "blue": 3.25,
@@ -17964,7 +17964,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 3,
     "blue": 3.75,
@@ -18006,7 +18006,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 3.4,
     "blue": 4.25,
@@ -18048,7 +18048,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 3.8,
     "blue": 4.75,
@@ -18090,7 +18090,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 4.2,
     "blue": 5.25,
@@ -18132,7 +18132,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 4.6,
     "blue": 5.75,
@@ -18174,7 +18174,7 @@
   {
     "location": "Morocc",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 5,
     "blue": 6.25,
@@ -42576,7 +42576,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.6,
     "blue": 0.75,
@@ -42604,7 +42604,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 0.9,
     "blue": 1.13,
@@ -42632,7 +42632,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 1.2,
     "blue": 1.5,
@@ -42660,7 +42660,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 1.5,
     "blue": 1.88,
@@ -42688,7 +42688,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 1.8,
     "blue": 2.25,
@@ -42716,7 +42716,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 2.4,
     "blue": 3,
@@ -42744,7 +42744,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 3,
     "blue": 3.75,
@@ -42772,7 +42772,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 3.6,
     "blue": 4.5,
@@ -42800,7 +42800,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 4.2,
     "blue": 5.25,
@@ -42828,7 +42828,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 4.8,
     "blue": 6,
@@ -42856,7 +42856,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 5.4,
     "blue": 6.75,
@@ -42884,7 +42884,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 6,
     "blue": 7.5,
@@ -42912,7 +42912,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 6.9,
     "blue": 8.63,
@@ -42940,7 +42940,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 7.8,
     "blue": 9.75,
@@ -42968,7 +42968,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 9,
     "blue": 11.25,
@@ -42996,7 +42996,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 10.2,
     "blue": 12.75,
@@ -43024,7 +43024,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 11.4,
     "blue": 14.25,
@@ -43052,7 +43052,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 12.6,
     "blue": 15.75,
@@ -43080,7 +43080,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 13.8,
     "blue": 17.25,
@@ -43108,7 +43108,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "One-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 15,
     "blue": 18.75,
@@ -43976,7 +43976,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.9,
     "blue": 1.13,
@@ -44004,7 +44004,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 1.35,
     "blue": 1.69,
@@ -44032,7 +44032,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 1.8,
     "blue": 2.25,
@@ -44060,7 +44060,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 2.25,
     "blue": 2.81,
@@ -44088,7 +44088,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 2.7,
     "blue": 3.38,
@@ -44116,7 +44116,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 3.6,
     "blue": 4.5,
@@ -44144,7 +44144,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 4.5,
     "blue": 5.63,
@@ -44172,7 +44172,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 5.4,
     "blue": 6.75,
@@ -44200,7 +44200,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 6.3,
     "blue": 7.88,
@@ -44228,7 +44228,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 7.2,
     "blue": 9,
@@ -44256,7 +44256,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 8.1,
     "blue": 10.13,
@@ -44284,7 +44284,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 9,
     "blue": 11.25,
@@ -44312,7 +44312,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 10.35,
     "blue": 12.94,
@@ -44340,7 +44340,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 11.7,
     "blue": 14.63,
@@ -44368,7 +44368,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 13.5,
     "blue": 16.88,
@@ -44396,7 +44396,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 15.3,
     "blue": 19.13,
@@ -44424,7 +44424,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 17.1,
     "blue": 21.38,
@@ -44452,7 +44452,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 18.9,
     "blue": 23.63,
@@ -44480,7 +44480,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 20.7,
     "blue": 25.88,
@@ -44508,7 +44508,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Two-handed Weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 22.5,
     "blue": 28.13,
@@ -45376,7 +45376,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 1,
     "white": 0.3,
     "blue": 0.38,
@@ -45404,7 +45404,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 2,
     "white": 0.45,
     "blue": 0.56,
@@ -45432,7 +45432,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 3,
     "white": 0.6,
     "blue": 0.75,
@@ -45460,7 +45460,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 4,
     "white": 0.75,
     "blue": 0.94,
@@ -45488,7 +45488,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 5,
     "white": 0.9,
     "blue": 1.13,
@@ -45516,7 +45516,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 6,
     "white": 1.2,
     "blue": 1.5,
@@ -45544,7 +45544,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 7,
     "white": 1.5,
     "blue": 1.88,
@@ -45572,7 +45572,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 8,
     "white": 1.8,
     "blue": 2.25,
@@ -45600,7 +45600,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 9,
     "white": 2.1,
     "blue": 2.63,
@@ -45628,7 +45628,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 10,
     "white": 2.4,
     "blue": 3,
@@ -45656,7 +45656,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 11,
     "white": 2.7,
     "blue": 3.38,
@@ -45684,7 +45684,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 12,
     "white": 3,
     "blue": 3.75,
@@ -45712,7 +45712,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 13,
     "white": 3.45,
     "blue": 4.31,
@@ -45740,7 +45740,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 14,
     "white": 3.9,
     "blue": 4.88,
@@ -45768,7 +45768,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 15,
     "white": 4.5,
     "blue": 5.63,
@@ -45796,7 +45796,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 16,
     "white": 5.1,
     "blue": 6.38,
@@ -45824,7 +45824,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 17,
     "white": 5.7,
     "blue": 7.13,
@@ -45852,7 +45852,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 18,
     "white": 6.3,
     "blue": 7.88,
@@ -45880,7 +45880,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 19,
     "white": 6.9,
     "blue": 8.63,
@@ -45908,7 +45908,7 @@
   {
     "location": "Aldebaran",
     "equipment_en": "Sub-weapon",
-    "stat_en": "Final DMG Bonus %",
+    "stat_en": "Final P.DMG/M.DMG Bonus %",
     "level": 20,
     "white": 7.5,
     "blue": 9.38,
