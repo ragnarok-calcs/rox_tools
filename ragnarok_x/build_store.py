@@ -435,11 +435,14 @@ def import_builds_by_uuid(raw_input: str) -> tuple[int, list]:
             i += 1
         off = doc.get("offensive", {})
         defn = doc.get("defensive", {})
+        # Assign a NEW build_id so the importing user gets an independent copy
+        # in the DB. Storing the original shared UUID would cause saves by this
+        # user to overwrite the donor's document (and vice-versa).
         st.session_state["builds"][name] = {
-            "build_id":    bid,
+            "build_id":    str(uuid.uuid4()),
             "offensive":   {f: off.get(f, default)  for f, (_, default) in OFFENSIVE_FIELDS.items()},
             "defensive":   {f: defn.get(f, default) for f, (_, default) in DEFENSIVE_FIELDS.items()},
-            "weapon_meta": doc.get("weapon_meta", _wm_defaults()),
+            "weapon_meta": _sanitize_weapon_meta(doc.get("weapon_meta", _wm_defaults())),
         }
         existing_names.add(name)
         n += 1
@@ -447,6 +450,106 @@ def import_builds_by_uuid(raw_input: str) -> tuple[int, list]:
     if n:
         _sync_to_db()
     return n, errors
+
+
+# ---------------------------------------------------------------------------
+# Inline build editor (shared by calculator / optimizer pages)
+# ---------------------------------------------------------------------------
+def _coerce_field(f: str, val) -> int | float:
+    """Coerce a stored build value to the correct Python type for its widget."""
+    if f in FLOAT_PCT_FIELDS:
+        return float(val)
+    if f in PCT_FIELDS or f in INT_FIELDS:
+        return int(val)
+    return float(val)
+
+
+def render_field_input(field: str, label: str, default, key: str):
+    """Render a single number_input for a build stat field."""
+    if field in FLOAT_PCT_FIELDS:
+        return st.number_input(
+            label, key=key, min_value=0.0, step=0.01, format="%.2f",
+            value=float(st.session_state.get(key, default)),
+        )
+    if field in PCT_FIELDS or field in INT_FIELDS:
+        return st.number_input(
+            label, key=key, min_value=0, step=1,
+            value=int(st.session_state.get(key, default)),
+        )
+    return st.number_input(
+        label, key=key, min_value=0.0,
+        value=float(st.session_state.get(key, default)),
+    )
+
+
+def render_inline_build_editor(build_name: str, kp: str) -> None:
+    """
+    Render a compact inline build editor expander for *build_name*.
+
+    Saves directly back to the build store without navigating away.
+
+    build_name : the build currently selected on the calling page.
+    kp         : a page-unique key prefix (e.g. ``"dc"`` or ``"so"``)
+                 that prevents widget-key collisions with Build Editor
+                 and other pages.
+    """
+    # ── Reset widget values whenever the selected build changes ───────────
+    _prev_key = f"_{kp}_ibe_prev"
+    if st.session_state.get(_prev_key) != build_name:
+        st.session_state[_prev_key] = build_name
+        off  = get_build_offensive(build_name)
+        defn = get_build_defensive(build_name)
+        for f, val in off.items():
+            st.session_state[f"{kp}_ibe_off_{f}"] = _coerce_field(f, val)
+        for f, val in defn.items():
+            st.session_state[f"{kp}_ibe_def_{f}"] = _coerce_field(f, val)
+
+    with st.expander(f"✏️  Edit: **{build_name}**", expanded=False):
+        tab_off, tab_def = st.tabs(["Offensive", "Defensive"])
+
+        off_vals: dict = {}
+        def_vals: dict = {}
+
+        with tab_off:
+            # Exclude scenario-level fields — they are set per calculation, not per build
+            off_fields = [
+                (f, lbl, dflt)
+                for f, (lbl, dflt) in OFFENSIVE_FIELDS.items()
+                if f not in SCENARIO_SELECT_FIELDS
+            ]
+            col1, col2 = st.columns(2)
+            mid = (len(off_fields) + 1) // 2
+            with col1:
+                for f, lbl, dflt in off_fields[:mid]:
+                    off_vals[f] = render_field_input(f, lbl, dflt, f"{kp}_ibe_off_{f}")
+            with col2:
+                for f, lbl, dflt in off_fields[mid:]:
+                    off_vals[f] = render_field_input(f, lbl, dflt, f"{kp}_ibe_off_{f}")
+
+        with tab_def:
+            def_fields = list(DEFENSIVE_FIELDS.items())
+            col1, col2 = st.columns(2)
+            mid = (len(def_fields) + 1) // 2
+            with col1:
+                for f, (lbl, dflt) in def_fields[:mid]:
+                    def_vals[f] = render_field_input(f, lbl, dflt, f"{kp}_ibe_def_{f}")
+            with col2:
+                for f, (lbl, dflt) in def_fields[mid:]:
+                    def_vals[f] = render_field_input(f, lbl, dflt, f"{kp}_ibe_def_{f}")
+
+        # Restore scenario-select fields from stored build so they are not zeroed on save
+        stored_off = get_build_offensive(build_name)
+        for f in SCENARIO_SELECT_FIELDS:
+            if f in OFFENSIVE_FIELDS:
+                off_vals[f] = stored_off.get(f, OFFENSIVE_FIELDS[f][1])
+
+        if st.button("💾 Save changes", key=f"{kp}_ibe_save", type="primary"):
+            try:
+                save_build(build_name, off_vals, def_vals, get_build_weapon_meta(build_name))
+                st.toast(f"'{build_name}' saved!", icon="✅")
+                st.rerun()
+            except ValueError as exc:
+                st.error(str(exc))
 
 
 # ---------------------------------------------------------------------------
