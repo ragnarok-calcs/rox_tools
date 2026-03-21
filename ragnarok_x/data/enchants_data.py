@@ -16,7 +16,7 @@ _AWAKENINGS_PATH = Path(__file__).parent / "awakenings_db.json"
 ENCHANT_STAT_FIELD_MAP: dict[str, str] = {
     "DMG Bonus":                    "pdmg_bonus",
     "DMG Bonus %":                  "pdmg_bonus_pct",
-    "Final DMG Bonus %":            "final_dmg_bonus",
+    "Final P.DMG/M.DMG Bonus %":    "final_pdmg_bonus",
     "Final Pen %":                  "total_final_pen",
     "[Element] Enhancement":        "element_enhance",
     "[Race] Monster DMG Inc":       "bonus_dmg_race",
@@ -28,7 +28,7 @@ ENCHANT_STAT_FIELD_MAP: dict[str, str] = {
 ENCHANT_STAT_LABELS: dict[str, str] = {
     "DMG Bonus":                    "P.DMG/M.DMG Bonus",
     "DMG Bonus %":                  "P.DMG/M.DMG Bonus %",
-    "Final DMG Bonus %":            "Final DMG Bonus %",
+    "Final P.DMG/M.DMG Bonus %":    "Final P.DMG/M.DMG Bonus %",
     "Final Pen %":                  "Final PEN %",
     "[Element] Enhancement":        "Element Enhance %",
     "[Race] Monster DMG Inc":       "Bonus DMG to Race %",
