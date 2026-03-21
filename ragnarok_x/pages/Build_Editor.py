@@ -18,9 +18,9 @@ from build_store import (
     render_sidebar,
 )
 from data.enchants_data import (
-    get_enchant_awakening_info, get_weapon_enchant_options,
+    get_enchant_awakening_info, get_enchant_quality_values,
     get_enchant_cities_for_stat, get_max_awakening_for_enchant_levels,
-    ENCHANT_STAT_FIELD_MAP, ENCHANT_STAT_LABELS, QUALITY_OPTIONS,
+    ENCHANT_STAT_FIELD_MAP, ENCHANT_STAT_LABELS,
 )
 
 st.set_page_config(page_title="Build Editor", layout="wide")
@@ -225,8 +225,11 @@ with tab_enchants:
 
     all_stat_names = ["None"] + list(ENCHANT_STAT_FIELD_MAP.keys())
 
+    _QUALITY_ICONS = {"White": "⬜", "Blue": "🔵", "Purple": "🟣", "Orange": "🟡"}
+    _QUALITY_ORDER = ["White", "Blue", "Purple", "Orange"]
+
     def _enchant_slot_row(prefix: str, i: int, wtype: str) -> dict | None:
-        col_s, col_l, col_q, col_c = st.columns([3, 1, 2, 2])
+        col_s, col_l, col_c, col_q = st.columns([3, 1, 2, 2])
         with col_s:
             stat = st.selectbox(
                 f"Slot {i + 1}", all_stat_names,
@@ -238,14 +241,10 @@ with tab_enchants:
                 key=f"{prefix}_{i}_lvl", label_visibility="collapsed",
                 disabled=(stat == "None"),
             )
-        with col_q:
-            qual = st.selectbox(
-                "Quality", QUALITY_OPTIONS,
-                key=f"{prefix}_{i}_qual", label_visibility="collapsed",
-                disabled=(stat == "None"),
-            )
 
         city = None
+        qual = st.session_state.get(f"{prefix}_{i}_qual", "Orange")
+
         if stat != "None":
             cities = get_enchant_cities_for_stat(wtype, stat)
             with col_c:
@@ -263,35 +262,53 @@ with tab_enchants:
                     st.session_state[f"{prefix}_{i}_city"] = city
                     st.caption(city)
 
-            opts = get_weapon_enchant_options(wtype, lvl, qual, awk_info["modifier"], city=city)
-            opt_map = {o["stat_en"]: o for o in opts}
-            if stat in opt_map:
-                raw = opt_map[stat]["raw_value"]
-                eff = opt_map[stat]["effective_value"]
+            qual_vals = get_enchant_quality_values(
+                wtype, lvl, stat, awk_info["modifier"], city=city,
+            )
+            if qual_vals:
+                available_quals = [q for q in _QUALITY_ORDER if q in qual_vals]
+
+                # Ensure the stored quality is a valid option before the selectbox renders
+                if qual not in available_quals:
+                    qual = available_quals[-1]
+                    st.session_state[f"{prefix}_{i}_qual"] = qual
+
                 modifier = awk_info["modifier"]
                 if modifier > 1.0:
-                    bonus = round(eff - raw, 4)
-                    st.caption(
-                        f"+{raw:g} base  +  +{bonus:g} awakening  =  **+{eff:g}**  "
-                        f"({ENCHANT_STAT_LABELS.get(stat, stat)})"
-                    )
+                    def _fmt(q, _vals=qual_vals, _mod=modifier, _icons=_QUALITY_ICONS):
+                        raw   = round(_vals[q] / _mod, 4)
+                        bonus = round(_vals[q] - raw, 4)
+                        return f"{_icons[q]}  +{raw:g} (base)  +{bonus:g} (awakening)"
                 else:
-                    st.caption(f"+{eff:g}  ({ENCHANT_STAT_LABELS.get(stat, stat)})")
+                    def _fmt(q, _vals=qual_vals, _icons=_QUALITY_ICONS):
+                        return f"{_icons[q]}  +{_vals[q]:g}"
+
+                with col_q:
+                    qual = st.selectbox(
+                        f"Quality slot {i + 1}",
+                        options=available_quals,
+                        format_func=_fmt,
+                        key=f"{prefix}_{i}_qual",
+                        label_visibility="collapsed",
+                    )
+            else:
+                st.caption("⚠️ No values found for this stat / level / city.")
+
             return {"stat_en": stat, "quality": qual, "city": city, "level": lvl}
         return None
 
     # Weapon enchants
     st.divider()
     st.markdown("**Weapon Enchants**")
-    col_hdr_s, col_hdr_l, col_hdr_q, col_hdr_c = st.columns([3, 1, 2, 2])
+    col_hdr_s, col_hdr_l, col_hdr_c, col_hdr_q = st.columns([3, 1, 2, 2])
     with col_hdr_s:
         st.caption("Stat")
     with col_hdr_l:
         st.caption("Lvl")
-    with col_hdr_q:
-        st.caption("Quality")
     with col_hdr_c:
         st.caption("City")
+    with col_hdr_q:
+        st.caption("Value")
 
     st.markdown("**Main Weapon**")
     main_enchants = [_enchant_slot_row("be_wm_main", i, weapon_type) for i in range(3)]

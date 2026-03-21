@@ -114,6 +114,43 @@ def get_enchant_cities_for_stat(weapon_type: str, stat_en: str) -> list[str]:
     return sorted(_ENCHANTS_DF[mask]["location"].dropna().unique().tolist())
 
 
+def get_enchant_quality_values(
+    weapon_type: str,
+    enchant_level: int,
+    stat_en: str,
+    modifier: float = 1.0,
+    city: str | None = None,
+) -> dict[str, float]:
+    """
+    Return {quality_name: effective_value} for all available quality tiers of a
+    specific stat at the given enchant level and city.  Order matches QUALITY_OPTIONS
+    (White → Blue → Purple → Orange).  Missing quality tiers are omitted.
+    """
+    equip_label = WEAPON_EQUIP_LABEL.get(weapon_type)
+    if equip_label is None:
+        return {}
+
+    mask = (
+        (_ENCHANTS_DF["equipment_en"] == equip_label) &
+        (_ENCHANTS_DF["level"] == enchant_level) &
+        (_ENCHANTS_DF["stat_en"] == stat_en)
+    )
+    if city is not None:
+        mask = mask & (_ENCHANTS_DF["location"] == city)
+
+    rows = _ENCHANTS_DF[mask]
+    if rows.empty:
+        return {}
+
+    result = {}
+    for qual_name, col in _QUALITY_COL.items():
+        if col in rows.columns:
+            best = rows[col].max()
+            if pd.notna(best):
+                result[qual_name] = round(float(best) * modifier, 4)
+    return result
+
+
 def get_weapon_enchant_options(
     weapon_type: str,
     enchant_level: int,
