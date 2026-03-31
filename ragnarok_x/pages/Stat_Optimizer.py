@@ -9,6 +9,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+import math
 import streamlit as st
 
 from build_store import (
@@ -16,7 +17,7 @@ from build_store import (
     PCT_FIELDS, SCENARIO_SELECT_FIELDS, EDITOR_GROUPS,
     init_store, get_builds,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
-    apply_card_effects, get_weights, render_sidebar,
+    apply_card_effects, get_weights, calculate, render_sidebar, render_inline_build_editor,
 )
 
 st.set_page_config(page_title="Stat Optimization", layout="wide")
@@ -113,6 +114,9 @@ with col_def:
 if not sel_def:
     st.info("Select at least one target build above.")
     st.stop()
+
+# ── Inline build editor ────────────────────────────────────────────────────
+render_inline_build_editor(sel_off, kp="so")
 
 st.divider()
 
@@ -295,17 +299,90 @@ ref_options = sorted(avg_norm.keys(), key=lambda k: labels_map[k])
 current_ref = st.session_state.get("so_ref", best_stat)
 if current_ref not in ref_options:
     current_ref = best_stat
-reference = st.selectbox(
-    "Reference stat for equivalence", options=ref_options,
-    format_func=lambda k: labels_map[k],
-    index=ref_options.index(current_ref),
-    key="so_ref",
-)
+col_ref, col_pts = st.columns([3, 1])
+with col_ref:
+    reference = st.selectbox(
+        "Reference stat for equivalence", options=ref_options,
+        format_func=lambda k: labels_map[k],
+        index=ref_options.index(current_ref),
+        key="so_ref",
+    )
+with col_pts:
+    ref_points = st.number_input(
+        "Points of reference", min_value=1, max_value=99999, value=1, step=1,
+        key="so_ref_points",
+        help="How many points of the reference stat to use as the comparison unit.",
+    )
+
+# ---------------------------------------------------------------------------
+# Actual damage delta and equivalence solver
+# ---------------------------------------------------------------------------
+def _calc_dmg_raw(off_raw: dict, def_name: str) -> float:
+    """Damage for a given raw off dict against def_name target."""
+    if dmg_type_param == "hybrid":
+        d_crit = calculate(mode, off_raw, eff_def_raws[def_name], "crit", attack_mult)
+        d_pen  = calculate(mode, off_raw, eff_def_raws[def_name], "pen",  attack_mult)
+        return hybrid_crit_pct * d_crit + (1 - hybrid_crit_pct) * d_pen
+    return calculate(mode, off_raw, eff_def_raws[def_name], dmg_type_param, attack_mult)
+
+base_dmg = {d: _calc_dmg_raw(eff_off_raws[d], d) for d in sel_def}
+
+def _ref_delta(def_name: str) -> float:
+    off = dict(eff_off_raws[def_name])
+    off[reference] = off.get(reference, OFFENSIVE_FIELDS[reference][1]) + ref_points
+    return _calc_dmg_raw(off, def_name) - base_dmg[def_name]
+
+target_deltas = {d: _ref_delta(d) for d in sel_def}
+avg_target_delta = sum(target_deltas.values()) / len(target_deltas)
+
+def _solve_equiv_pts(field: str, def_name: str) -> float:
+    """Bisect to find points of `field` that equal the reference damage delta."""
+    td = target_deltas[def_name]
+    if td <= 0:
+        return 0.0
+    if all_weights[def_name].get(field, 0) <= 0:
+        return math.inf
+    base_off = eff_off_raws[def_name]
+    base_val = base_off.get(field, OFFENSIVE_FIELDS[field][1])
+    def gain(x: float) -> float:
+        off = dict(base_off)
+        off[field] = base_val + x
+        return _calc_dmg_raw(off, def_name) - base_dmg[def_name]
+    hi = max(float(ref_points) * 10, 100.0)
+    for _ in range(40):
+        if gain(hi) >= td:
+            break
+        hi *= 2
+    else:
+        return math.inf
+    lo = 0.0
+    for _ in range(64):
+        if hi - lo < 1e-4:
+            break
+        mid = (lo + hi) / 2
+        if gain(mid) >= td:
+            hi = mid
+        else:
+            lo = mid
+    return (lo + hi) / 2
+
+actual_equiv: dict[str, float] = {}
+for _f in avg_norm:
+    if _f == reference:
+        actual_equiv[_f] = float(ref_points)
+    else:
+        _equivs = [_solve_equiv_pts(_f, d) for d in sel_def]
+        actual_equiv[_f] = (
+            math.inf if any(math.isinf(e) for e in _equivs)
+            else sum(_equivs) / len(_equivs)
+        )
 
 ref_avg      = avg_norm[reference]
 sorted_items = sorted(avg_norm.items(), key=lambda x: x[1], reverse=True)
 ref_label = labels_map[reference]
 
+_delta_label = f"+{avg_target_delta:,.2f} DMG" if avg_target_delta > 0 else "—"
+_ref_pts_label = f"{ref_points} {ref_label}"
 header_html = f"""
 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;
             padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.15);
@@ -314,7 +391,7 @@ header_html = f"""
     <div style="flex:2;">Stat</div>
     <div style="flex:3;">Relative Priority</div>
     <div style="flex:1; text-align:right; padding-right:8px;">Score</div>
-    <div style="flex:1; text-align:right;">Per 1 {ref_label}</div>
+    <div style="flex:1; text-align:right;" title="Points needed to match {_ref_pts_label} ({_delta_label})">Equiv pts ≈ {_delta_label}</div>
 </div>
 """
 
@@ -339,14 +416,14 @@ for rank, (field, avg_v) in enumerate(sorted_items):
     label  = labels_map[field]
     is_ref = field == reference
     norm   = avg_v
-    equiv  = ref_avg / avg_v if avg_v > 0 else 0
+    equiv  = actual_equiv.get(field, math.inf)
 
     bg, fg = _score_color(norm)
 
     bar_w  = int(norm * 100)
     n_sty  = "font-weight:700;" if is_ref else ""
     star   = " ★" if is_ref else ""
-    eq_str = "1.00" if is_ref else f"{equiv:.2f}"
+    eq_str = f"{ref_points}" if is_ref else ("∞" if math.isinf(equiv) else f"{equiv:.2f}")
 
     rows_html += f"""
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:{'4px' if multi else '7px'};">

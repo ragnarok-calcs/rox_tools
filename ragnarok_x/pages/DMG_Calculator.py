@@ -16,7 +16,7 @@ from build_store import (
     PCT_FIELDS, SCENARIO_SELECT_FIELDS,
     init_store, get_builds,
     get_build_offensive, get_build_defensive, get_build_weapon_meta,
-    apply_card_effects, calculate, render_sidebar,
+    apply_card_effects, calculate, render_sidebar, render_inline_build_editor,
 )
 
 st.set_page_config(page_title="DMG Calculator", layout="wide")
@@ -108,6 +108,10 @@ with col_def:
 if not sel_off or not sel_def:
     st.info("Select at least one offensive build and one target build above.")
     st.stop()
+
+# ── Inline build editor (single offensive build selected) ─────────────────
+if len(sel_off) == 1:
+    render_inline_build_editor(sel_off[0], kp="dc")
 
 # ---------------------------------------------------------------------------
 # Calculation
