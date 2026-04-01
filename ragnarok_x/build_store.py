@@ -105,27 +105,32 @@ SCENARIO_SELECT_FIELDS = {
 
 # Grouped layout for the editor: (header, icon, [off_fields], [def_fields], effective_fn_pve, effective_fn_pvp)
 # effective_fn(off_vals_raw, def_vals_raw) -> float
+_PVP_EXP = 0.6  # exponent applied to the inner product in the PVP formula
+
 EDITOR_GROUPS = [
     ('Base Attack',  '⚔️',  ['patk', 'aspd', 'pdmg_bonus', 'pdmg_bonus_pct'],        ['pdmg_reduc'],               None, None),
+    # Crit/Pen: atk_mult is inside inner^0.6 in PVP, so raise to _PVP_EXP
     ('Crit',         '💥',  ['crit_dmg_bonus'],                                       ['crit_dmg_reduc'],
         lambda o, d: max(o['crit_dmg_bonus'] / 100 - d['crit_dmg_reduc'] / 100, 0.2),
-        lambda o, d: max(o['crit_dmg_bonus'] / 100 - d['crit_dmg_reduc'] / 100, 0.2),
+        lambda o, d: max(o['crit_dmg_bonus'] / 100 - d['crit_dmg_reduc'] / 100, 0.2) ** _PVP_EXP,
     ),
     ('Penetration',  '🔱',  ['total_final_pen'],                                      ['total_final_def'],
         lambda o, d: pen_multiplier((o['total_final_pen'] - d['total_final_def']) / 100),
-        lambda o, d: pen_multiplier((o['total_final_pen'] - d['total_final_def']) / 100),
+        lambda o, d: pen_multiplier((o['total_final_pen'] - d['total_final_def']) / 100) ** _PVP_EXP,
     ),
+    # The following four groups are pure multiplicative factors inside inner^0.6,
+    # so their effective contribution to PVP damage is F^0.6 (since (A·B)^0.6 = A^0.6·B^0.6).
     ('Final P/M.DMG','🎯',  ['final_pdmg_bonus'],                                     ['final_pdmg_reduc'],
         lambda o, d: max(1 + (o['final_pdmg_bonus'] - d['final_pdmg_reduc']) / 100, 0.2),
-        lambda o, d: max(1 + (o['final_pdmg_bonus'] - d['final_pdmg_reduc']) / 100, 0.2),
+        lambda o, d: max(1 + (o['final_pdmg_bonus'] - d['final_pdmg_reduc']) / 100, 0.2) ** _PVP_EXP,
     ),
     ('Size',         '📏',  ['weapon_size_modifier', 'size_enhance'],                 ['size_reduc'],
         lambda o, d: max((o['weapon_size_modifier'] + o['size_enhance']) / 100, 0.2),
-        lambda o, d: max((o['weapon_size_modifier'] + o['size_enhance'] - d['size_reduc']) / 100, 0.2),
+        lambda o, d: max((o['weapon_size_modifier'] + o['size_enhance'] - d['size_reduc']) / 100, 0.2) ** _PVP_EXP,
     ),
     ('Element',      '🌀',  ['elemental_counter', 'element_enhance'],                   ['element_resist'],
         lambda o, d: max((o['elemental_counter'] + o['element_enhance']) / 100, 0.2),
-        lambda o, d: max((o['elemental_counter'] + o['element_enhance'] - d['element_resist']) / 100, 0.2),
+        lambda o, d: max((o['elemental_counter'] + o['element_enhance'] - d['element_resist']) / 100, 0.2) ** _PVP_EXP,
     ),
     ('Monster Elem', '🎯',  ['bonus_dmg_element'],                                      [],
         lambda o, d: 1 + o['bonus_dmg_element'] / 100,
@@ -133,12 +138,13 @@ EDITOR_GROUPS = [
     ),
     ('Race',         '👥',  ['bonus_dmg_race'],                                       ['race_reduc'],
         lambda o, d: 1 + o['bonus_dmg_race'] / 100,
-        lambda o, d: max(1 + (o['bonus_dmg_race'] - d['race_reduc']) / 100, 0.2),
+        lambda o, d: max(1 + (o['bonus_dmg_race'] - d['race_reduc']) / 100, 0.2) ** _PVP_EXP,
     ),
     ('Final DMG',    '🔥',  ['final_dmg_bonus'],                                      ['final_dmg_reduc'],
         lambda o, d: max(1 + (o['final_dmg_bonus'] - d['final_dmg_reduc']) / 100, 0.2),
-        lambda o, d: max(1 + (o['final_dmg_bonus'] - d['final_dmg_reduc']) / 100, 0.2),
+        lambda o, d: max(1 + (o['final_dmg_bonus'] - d['final_dmg_reduc']) / 100, 0.2) ** _PVP_EXP,
     ),
+    # PVP DMG (pvp_final_pdmg_bonus) is OUTSIDE inner^0.6 — no exponent applied.
     ('PVP DMG',      '⚡',  ['pvp_final_pdmg_bonus', 'pvp_pdmg_bonus'],               ['pvp_pdmg_reduc', 'pvp_final_pdmg_reduc'],
         None,
         lambda o, d: max(1 + (o['pvp_final_pdmg_bonus'] - d['pvp_final_pdmg_reduc']) / 100, 0.2),
