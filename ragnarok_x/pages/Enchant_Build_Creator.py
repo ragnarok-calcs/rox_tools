@@ -40,7 +40,7 @@ st.markdown("**Enchant Parameters**")
 col_wt, col_wlvl, col_alvl, col_aclvl = st.columns(4)
 with col_wt:
     fe_weapon_type = st.radio(
-        "Weapon Type", ["one-handed", "two-handed"],
+        "Weapon Type", ["one-handed", "two-handed", "dagger"],
         format_func=lambda x: x.title(),
         horizontal=True, key="be_fe_weapon_type",
     )
@@ -177,6 +177,10 @@ fe_sub_slots: list[dict | None] = [None, None, None]
 if fe_weapon_type == "one-handed":
     fe_sub_slots = list(
         _piece_section("Sub-Weapon", "be_fe_sub", WEAPON_EQUIP_LABEL["sub"], ENCHANT_STAT_FIELD_MAP, fe_weapon_lvl)
+    )
+elif fe_weapon_type == "dagger":
+    fe_sub_slots = list(
+        _piece_section("Off-hand Dagger", "be_fe_sub", WEAPON_EQUIP_LABEL["dagger"], ENCHANT_STAT_FIELD_MAP, fe_weapon_lvl)
     )
 
 # ── Armor pieces ───────────────────────────────────────────────────────────

@@ -205,7 +205,7 @@ with tab_enchants:
     col_wt, col_awk = st.columns(2)
     with col_wt:
         weapon_type = st.radio(
-            "Weapon Type", ["one-handed", "two-handed"],
+            "Weapon Type", ["one-handed", "two-handed", "dagger"],
             format_func=lambda x: x.title(),
             horizontal=True, key="be_wm_weapon_type",
         )
@@ -317,6 +317,9 @@ with tab_enchants:
     if weapon_type == "one-handed":
         st.markdown("**Sub-Weapon**")
         sub_enchants = [_enchant_slot_row("be_wm_sub", i, "sub") for i in range(3)]
+    elif weapon_type == "dagger":
+        st.markdown("**Off-hand Dagger**")
+        sub_enchants = [_enchant_slot_row("be_wm_sub", i, "dagger") for i in range(3)]
 
     # Armor enchants
     st.divider()

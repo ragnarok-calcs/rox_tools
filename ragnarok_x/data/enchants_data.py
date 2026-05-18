@@ -40,6 +40,7 @@ ENCHANT_STAT_LABELS: dict[str, str] = {
 WEAPON_EQUIP_LABEL: dict[str, str] = {
     "one-handed": "One-handed Weapon",
     "two-handed":  "Two-handed Weapon",
+    "dagger":      "Dagger",
     "sub":         "Sub-weapon",
 }
 
@@ -233,7 +234,7 @@ def get_weapon_enchant_options(
     When city is None the highest base value across all cities is used.
     When city is provided only rows from that city are considered.
 
-    weapon_type: "one-handed", "two-handed", or "sub"
+    weapon_type: "one-handed", "two-handed", "dagger", or "sub"
     """
     equip_label = WEAPON_EQUIP_LABEL.get(weapon_type)
     if equip_label is None:
