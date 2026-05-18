@@ -120,6 +120,8 @@ st.divider()
 # ---------------------------------------------------------------------------
 wm                 = get_build_weapon_meta(sel_off)
 weapon_type        = wm["weapon_type"]
+_sub_wtype         = "sub" if weapon_type == "one-handed" else ("dagger" if weapon_type == "dagger" else None)
+_sub_slot_label    = "Off-hand" if weapon_type == "dagger" else "Sub"
 awakening          = wm["enchant_awakening"]
 awk_info           = get_enchant_awakening_info(awakening)
 enchant_lvl        = awk_info["enchant_lvl"]
@@ -184,8 +186,8 @@ def _current_enchant_totals(slots: list, wtype: str) -> dict[str, float]:
 # Strip the build's current recorded enchants so the optimizer starts from a clean base
 _main_contrib = _current_enchant_totals(wm.get("main_enchants") or [], weapon_type)
 _sub_contrib  = (
-    _current_enchant_totals(wm.get("sub_enchants") or [], "sub")
-    if weapon_type == "one-handed" else {}
+    _current_enchant_totals(wm.get("sub_enchants") or [], _sub_wtype)
+    if _sub_wtype else {}
 )
 off_raw_stripped = dict(off_raw_base)
 for _field, _val in {**_main_contrib, **_sub_contrib}.items():
@@ -258,9 +260,9 @@ def _run_optimize():
     )
     main_combos = list(combinations_with_replacement(main_opts, 3)) if main_opts else [()]
 
-    if weapon_type == "one-handed":
+    if _sub_wtype:
         sub_opts   = _opts_to_tuples(
-            get_weapon_enchant_options("sub", weapon_enchant_lvl, quality, modifier)
+            get_weapon_enchant_options(_sub_wtype, weapon_enchant_lvl, quality, modifier)
         )
         sub_combos = list(combinations_with_replacement(sub_opts, 3)) if sub_opts else [()]
     else:
@@ -281,13 +283,13 @@ def _run_optimize():
 # Current build enchants row
 _cur_main_tuples = _slot_list_to_tuples(wm.get("main_enchants") or [], weapon_type)
 _cur_sub_tuples  = (
-    _slot_list_to_tuples(wm.get("sub_enchants") or [], "sub")
-    if weapon_type == "one-handed" else []
+    _slot_list_to_tuples(wm.get("sub_enchants") or [], _sub_wtype)
+    if _sub_wtype else []
 )
 _cur_main_label = _combo_label(tuple(_cur_main_tuples))
 _cur_sub_label  = _combo_label(tuple(_cur_sub_tuples))
 if _cur_sub_label and _cur_sub_label != "—":
-    current_combo_text = f"Main: {_cur_main_label}  |  Sub: {_cur_sub_label}"
+    current_combo_text = f"Main: {_cur_main_label}  |  {_sub_slot_label}: {_cur_sub_label}"
 else:
     current_combo_text = _cur_main_label if _cur_main_label != "—" else "No enchants recorded"
 current_score = _score(off_raw_base)
@@ -405,7 +407,7 @@ for rank, (r_avg, r_per_target, r_mc, r_sc) in enumerate(top5):
     main_label = _combo_label(r_mc)
     sub_label  = _combo_label(r_sc) if r_sc else ""
     if sub_label and sub_label != "—":
-        r_combo_text = f"Main: {main_label}  |  Sub: {sub_label}"
+        r_combo_text = f"Main: {main_label}  |  {_sub_slot_label}: {sub_label}"
     else:
         r_combo_text = main_label
 
